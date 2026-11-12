@@ -1,0 +1,13 @@
+**/node_modules/**
+**/.expo/**
+**/dist/**
+**/coverage/**
+**/ios/**
+**/android/**
+**/Pods/**
+**/.build/**
+**/build/**
+**/DerivedData/**
+**/expo-env.d.ts
+pnpm-lock.yaml
+
