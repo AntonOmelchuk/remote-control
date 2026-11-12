@@ -4,7 +4,7 @@ An iPhone remote for controlling a MacBook over a local network.
 
 The product provides convenient access to audio, video playback, and selected system actions from a phone. The engineering goals are maintainable code, a secure command protocol, and predictable behavior when connectivity is interrupted.
 
-**Status: local foundation configured.** The iOS-focused mobile starter, formatting, ESLint, TypeScript checks, and Git hooks have been configured. The combined local check passes, and the pre-commit hook ran successfully during the initial commit. Two upstream ESLint peer-dependency warnings remain documented in an ADR. Native iPhone execution, Mac control, pairing, the browser extension, and CI have not been implemented or verified yet. The architecture below describes the planned product.
+**Status: repository foundation configured.** The iOS-focused mobile starter, formatting, ESLint, TypeScript checks, and Git hooks are configured. Both pre-commit and pre-push hooks have been verified. GitHub Actions runs formatting, lint, and type checks, and the active ruleset for `main` requires pull requests and a successful `Quality checks` result before merging. Two upstream ESLint peer-dependency warnings remain documented in an ADR. Native iPhone execution, Mac control, pairing, and the browser extension have not been implemented or verified yet. The architecture below describes the planned product.
 
 ## Contents
 
@@ -25,19 +25,20 @@ The product provides convenient access to audio, video playback, and selected sy
 
 ## Features and Status
 
-| Feature                | Scope                                                     | Status                                               |
-| ---------------------- | --------------------------------------------------------- | ---------------------------------------------------- |
-| Mobile client          | React Native, TypeScript, Expo Router                     | Scaffolded; local typecheck passes                   |
-| Pairing                | Add an iPhone using a QR code and confirmation on the Mac | Planned for MVP                                      |
-| Audio control          | Volume, mute, and current state                           | Planned for MVP                                      |
-| YouTube                | Play/pause, seeking, and tab selection                    | Planned for MVP                                      |
-| Timer                  | Pause the selected video after a specified duration       | Planned for MVP                                      |
-| Video websites         | Playback controls and next episode                        | After MVP; a separate site adapter is required       |
-| Mac sleep and shutdown | Standard system actions                                   | After API and permission validation                  |
-| Brightness             | Hardware display brightness                               | Experimental; requires testing on the target MacBook |
-| Touchpad               | Pointer movement, clicking, and scrolling                 | Later milestone                                      |
-| Quality tooling        | ESLint, Prettier, Husky, and lint-staged                  | Configured locally; pre-commit verified              |
-| CI                     | Automated repository-side checks                          | Planned                                              |
+| Feature                | Scope                                                                      | Status                                               |
+| ---------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Mobile client          | React Native, TypeScript, Expo Router                                      | Scaffolded; local typecheck passes                   |
+| Pairing                | Add an iPhone using a QR code and confirmation on the Mac                  | Planned for MVP                                      |
+| Audio control          | Volume, mute, and current state                                            | Planned for MVP                                      |
+| YouTube                | Play/pause, seeking, and tab selection                                     | Planned for MVP                                      |
+| Timer                  | Pause the selected video after a specified duration                        | Planned for MVP                                      |
+| Video websites         | Playback controls and next episode                                         | After MVP; a separate site adapter is required       |
+| Mac sleep and shutdown | Standard system actions                                                    | After API and permission validation                  |
+| Brightness             | Hardware display brightness                                                | Experimental; requires testing on the target MacBook |
+| Touchpad               | Pointer movement, clicking, and scrolling                                  | Later milestone                                      |
+| Quality tooling        | ESLint, Prettier, Husky, and lint-staged                                   | Configured; pre-commit and pre-push verified         |
+| CI                     | Automated formatting, lint, and type checks through GitHub Actions         | Verified on pushes and pull requests                 |
+| Branch protection      | Pull requests, required CI, deletion protection, and force-push protection | Active for `main`                                    |
 
 The first target configuration is a physical iPhone, an Apple Silicon MacBook, and Chrome. Support for additional devices and browsers will follow validation of the primary workflow.
 
@@ -94,26 +95,26 @@ These names describe the intended organization. Concrete files and interfaces wi
 
 ## Repository Structure
 
-| Path                                  | Responsibility                                   | Status                          |
-| ------------------------------------- | ------------------------------------------------ | ------------------------------- |
-| `apps/mobile/`                        | React Native mobile application                  | Created                         |
-| `apps/mobile/src/app/`                | Expo Router file-based routes and layouts        | Included in the starter         |
-| `apps/mobile/src/components/`         | UI components                                    | Included in the starter         |
-| `apps/mobile/src/constants/`          | Existing starter constants and theme             | Included in the starter         |
-| `apps/mobile/modules/remote-network/` | Swift Expo Module for networking                 | Planned                         |
-| `apps/macos/`                         | Agent, SwiftUI interface, and system adapters    | Planned                         |
-| `apps/browser-extension/`             | Chrome extension and media adapters              | Planned                         |
-| `packages/protocol/`                  | Command schemas, TypeScript models, and fixtures | Planned                         |
-| `packages/remote-core/`               | Shared Swift package                             | Planned                         |
-| `docs/`                               | Technical explanations and guides                | Added incrementally             |
-| `package.json`                        | Root commands and tooling configuration          | Configured                      |
-| `pnpm-workspace.yaml`                 | pnpm workspace boundaries                        | Configured                      |
-| `pnpm-lock.yaml`                      | Resolved dependency tree                         | Created                         |
-| `.nvmrc`                              | Selected Node.js version                         | Configured                      |
-| `.husky/`                             | Pre-commit and pre-push commands                 | Configured; pre-commit verified |
-| `apps/mobile/eslint.config.cjs`       | Expo lint rules and compatibility adapter        | Configured                      |
-| `.prettierrc.json`                    | Shared formatting policy                         | Configured                      |
-| `.github/workflows/`                  | Automated checks                                 | Planned                         |
+| Path                                  | Responsibility                                   | Status                   |
+| ------------------------------------- | ------------------------------------------------ | ------------------------ |
+| `apps/mobile/`                        | React Native mobile application                  | Created                  |
+| `apps/mobile/src/app/`                | Expo Router file-based routes and layouts        | Included in the starter  |
+| `apps/mobile/src/components/`         | UI components                                    | Included in the starter  |
+| `apps/mobile/src/constants/`          | Existing starter constants and theme             | Included in the starter  |
+| `apps/mobile/modules/remote-network/` | Swift Expo Module for networking                 | Planned                  |
+| `apps/macos/`                         | Agent, SwiftUI interface, and system adapters    | Planned                  |
+| `apps/browser-extension/`             | Chrome extension and media adapters              | Planned                  |
+| `packages/protocol/`                  | Command schemas, TypeScript models, and fixtures | Planned                  |
+| `packages/remote-core/`               | Shared Swift package                             | Planned                  |
+| `docs/`                               | Technical explanations and guides                | Added incrementally      |
+| `package.json`                        | Root commands and tooling configuration          | Configured               |
+| `pnpm-workspace.yaml`                 | pnpm workspace boundaries                        | Configured               |
+| `pnpm-lock.yaml`                      | Resolved dependency tree                         | Created                  |
+| `.nvmrc`                              | Selected Node.js version                         | Configured               |
+| `.husky/`                             | Pre-commit and pre-push commands                 | Both hooks verified      |
+| `apps/mobile/eslint.config.cjs`       | Expo lint rules and compatibility adapter        | Configured               |
+| `.prettierrc.json`                    | Shared formatting policy                         | Configured               |
+| `.github/workflows/ci.yml`            | GitHub Actions formatting, lint, and type checks | Implemented and verified |
 
 The pnpm workspace manages JavaScript and TypeScript packages with their own `package.json` files. Swift projects can live in the same Git repository, while Swift Package Manager and Xcode manage their dependencies and builds.
 
@@ -184,24 +185,31 @@ The initial TypeScript check reported missing CSS declarations and an incompatib
 
 The latest combined local check passes: formatting, ESLint, and TypeScript. Native compilation and execution on a physical iPhone have not yet been confirmed.
 
-A future clean checkout must also generate the required Expo types before type checking. The corresponding bootstrap step will be included in CI.
+After installing dependencies in a clean checkout, generate the required Expo types before running `pnpm check`:
+
+```bash
+pnpm --dir apps/mobile exec expo customize tsconfig.json
+```
+
+GitHub Actions performs this step automatically before running the quality checks.
 
 ## Code Quality
 
-The baseline local checks are configured. CI, automated tests, and native build checks will be added alongside their implementation.
+Local quality checks and GitHub Actions are configured and verified. Automated tests and native build checks will be added alongside their implementation.
 
-| Mechanism                    | Responsibility                                                 | Current Status                                 |
-| ---------------------------- | -------------------------------------------------------------- | ---------------------------------------------- |
-| TypeScript strict mode       | Application type consistency                                   | Passing locally                                |
-| ESLint flat config           | JavaScript/TypeScript, React, and hooks rules                  | Passing locally with the compatibility adapter |
-| Prettier                     | Consistent TS/JS/JSON/YAML/Markdown formatting                 | Passing locally                                |
-| Husky pre-commit             | Run lint-staged during a commit                                | Verified during the initial commit             |
-| lint-staged                  | Lint and format staged files using their nearest configuration | Verified during the initial commit             |
-| Husky pre-push               | Run the full local check before a push                         | Configured; hook invocation not yet verified   |
-| Unit and contract tests      | Business rules and command contracts                           | Planned                                        |
-| Swift formatting and linting | Swift code consistency                                         | Planned when Swift targets exist               |
-| Native build checks          | Compilation of actual Apple targets                            | Planned                                        |
-| Required status checks       | Successful CI checks before merging                            | Planned                                        |
+| Mechanism                    | Responsibility                                                  | Current Status                                           |
+| ---------------------------- | --------------------------------------------------------------- | -------------------------------------------------------- |
+| TypeScript strict mode       | Application type consistency                                    | Passing locally and in CI                                |
+| ESLint flat config           | JavaScript/TypeScript, React, and hooks rules                   | Passing locally and in CI with the compatibility adapter |
+| Prettier                     | Consistent TS/JS/JSON/YAML/Markdown formatting                  | Passing locally and in CI                                |
+| Husky pre-commit             | Run lint-staged during a commit                                 | Verified during the initial commit                       |
+| lint-staged                  | Lint and format staged files using their nearest configuration  | Verified during the initial commit                       |
+| Husky pre-push               | Run the full local check before a push                          | Verified during pushes and with a restricted PATH        |
+| GitHub Actions               | Run quality checks on pushes and pull requests targeting `main` | Implemented and verified                                 |
+| Unit and contract tests      | Business rules and command contracts                            | Planned                                                  |
+| Swift formatting and linting | Swift code consistency                                          | Planned when Swift targets exist                         |
+| Native build checks          | Compilation of actual Apple targets                             | Planned                                                  |
+| Required status checks       | Successful CI checks before merging                             | Active for `main`; `Quality checks` is required          |
 
 ### Local Commands
 
@@ -238,7 +246,36 @@ lint-staged selects the configuration nearest to each file; it does not merge th
 
 The pre-commit hook completed successfully during the initial commit. During a first commit, lint-staged cannot create a backup stash against an existing commit; subsequent commits have a previous commit available.
 
-The pre-push hook runs `pnpm check`. Its configuration is present, but hook invocation has not yet been verified. Local hooks can be bypassed; repository-side CI and required status checks remain a separate planned step.
+The pre-push hook runs `pnpm check`. It has completed successfully during actual pushes and when invoked with a restricted `PATH` to verify the GUI environment setup. The local Husky startup file loads nvm and selects the Node.js version from `.nvmrc`; this machine-specific setup is not committed.
+
+Local hooks provide early feedback. GitHub Actions independently runs the checks, and the active ruleset requires a successful `Quality checks` result before a pull request can merge into `main`.
+
+### Continuous Integration
+
+The workflow is defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). It runs on pushes, pull requests targeting `main`, and manual dispatches when the workflow is available on the default branch.
+
+The `Quality checks` job runs on Ubuntu 24.04 and performs the following steps:
+
+1. Check out the repository without persisting Git credentials.
+2. Install the pnpm version declared in the root `package.json` and the Node.js version from `.nvmrc`.
+3. Install dependencies with `pnpm install --frozen-lockfile`.
+4. Generate Expo types with `pnpm --dir apps/mobile exec expo customize tsconfig.json`.
+5. Run `pnpm check`: formatting, ESLint, and TypeScript checks.
+
+The workflow has read-only repository contents permissions, disables Husky on the runner, caches the pnpm store, and limits job execution to 15 minutes. Newer runs cancel older runs in the same concurrency group. Third-party actions are pinned to full commit hashes.
+
+This job validates the current JavaScript and TypeScript setup. Automated tests and native Apple builds are planned separately.
+
+### Main Branch Protection
+
+The active `Protect main` ruleset targets the default branch, currently `main`, and requires:
+
+- A pull request before merging.
+- A successful `Quality checks` status check.
+- Protection against branch deletion.
+- Protection against force pushes.
+
+Required approvals are set to zero for the current solo-maintainer workflow. These rules are configured in GitHub repository settings; the workflow YAML defines the CI job, while the ruleset makes its successful result a merge requirement.
 
 ### Testing Plan
 
@@ -251,7 +288,7 @@ Tests should cover behavior where failures matter: authentication, access revoca
 3. Update documentation when behavior or setup changes.
 4. Review the staged changes; pre-commit may apply formatting or lint fixes.
 5. Describe the result and validation in the pull request.
-6. Once CI is configured, require it to pass before merging.
+6. Wait for `Quality checks` to pass, then use Squash and merge to integrate the pull request into `main`.
 7. Record physical-device checks separately from automated checks.
 
 ## Security Model
@@ -342,7 +379,7 @@ Comments should explain intent, constraints, or non-obvious decisions rather tha
 
 ## Implementation Roadmap
 
-1. Baseline local quality tooling and the initial commit are complete; verify pre-push and add CI next.
+1. Completed: baseline local quality tooling, verified Git hooks, GitHub Actions, and the active protection ruleset for `main`.
 2. Replace the demo UI and then remove unused starter images, styles, and scripts.
 3. Configure the development build and launch it on a physical iPhone.
 4. Create the macOS Agent and validate system APIs.
