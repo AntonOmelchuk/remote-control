@@ -1,5 +1,4 @@
 export const previewMedia = {
-  title: 'Sunday, slowed down',
   source: 'YouTube',
   durationSeconds: 768,
   startingPositionSeconds: 272,
@@ -83,8 +82,4 @@ function unreachable(_action: never): never {
 
 export function formatPlaybackTime(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-}
-
-export function formatSleepTimer(minutes: SleepTimerMinutes): string {
-  return minutes === null ? 'Off' : `${minutes} min`;
 }

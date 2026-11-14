@@ -2,13 +2,16 @@
 
 The first mobile milestone establishes the visual language, navigation, and a deliberately isolated interactive preview. It does not connect to, discover, authenticate with, or control a Mac.
 
+The shell now also includes the preferences milestone described in [App Preferences](app-preferences.md).
+
 ## Current Screens
 
-| Route               | Purpose                        | Available behavior                                                                                                  |
-| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `/`                 | Disconnected home              | Show the product identity, an unconnected device state, and an entry to the preview                                 |
-| `/connection-guide` | Explain the planned connection | Describe the future Mac companion, local networking, and QR confirmation; clearly state that pairing is unavailable |
-| `/preview`          | Explore the remote interface   | Change sample volume, mute, toggle playback state, seek, choose a timer preset, and reset local state               |
+| Route               | Purpose                             | Available behavior                                                                                                  |
+| ------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/`                 | Disconnected home                   | Show the product identity, an unconnected device state, and an entry to the preview                                 |
+| `/connection-guide` | Explain the planned connection      | Describe the future Mac companion, local networking, and QR confirmation; clearly state that pairing is unavailable |
+| `/preview`          | Explore the remote interface        | Change sample volume, mute, toggle playback state, seek, choose a timer preset, and reset local state               |
+| `/settings`         | Language and appearance preferences | Choose system/English/Ukrainian and system/light/dark, with local persistence                                       |
 
 The sample MacBook and video are fixtures. They do not represent a discovered device, a browser tab, or a live media session. The preview does not play media or advance a playback clock. Timer selection updates a preset label; it does not start a countdown or pause anything.
 
@@ -62,17 +65,17 @@ These are implementation choices, not a claim that an accessibility audit has pa
 
 ## Configuration and Cleanup
 
-`app.json` explicitly targets iOS, disables tablet support, selects a dark interface, and uses the `remotecontrol` URL scheme. The root and splash backgrounds match the interface.
+`app.json` explicitly targets iOS, disables tablet support, supports automatic appearance, and uses the `remotecontrol` URL scheme. The preferences milestone adds separate light/dark palettes and localized navigation.
 
 The Expo demo routes, components, hooks, CSS, and unused images are removed. The existing app icon, Icon Composer assets, and splash image remain placeholders for the branding milestone. The legacy reset script remains for a separate review.
 
-No dependency or lockfile changes are needed. Existing browser-related packages remain installed pending a separate dependency cleanup that updates the lockfile. They do not enable a mobile web target.
+The initial shell required no dependency changes. The preferences milestone adds `expo-localization`, AsyncStorage, `i18next`, and `react-i18next`; its dependency changes belong in the existing pnpm lockfile. Existing browser-related packages remain installed pending a separate dependency cleanup that updates the lockfile. They do not enable a mobile web target.
 
 No native projects, signing configuration, camera permissions, local-network permissions, or transport security exceptions are added. Those belong to the corresponding native and connection milestones.
 
 ## Validation
 
-Validation uses the supplied dependency manifest and compatible resolved packages in an isolated workspace. The repository lockfile was not included in the source archive, so the contributor must also run the repository checks against the existing pnpm lockfile after applying the change.
+Validation includes implementation-workspace checks and the maintainer's repository checks. The latest `pnpm check` passes formatting, ESLint, TypeScript, and all 13 unit tests. Recorded preferences checks on an iPhone are listed in [App Preferences](app-preferences.md#recorded-iphone-checks).
 
 | Check                                                            | Result                                     |
 | ---------------------------------------------------------------- | ------------------------------------------ |
@@ -118,13 +121,15 @@ The shell has been launched on a physical iPhone through Expo Go. A custom devel
 
 The home and preview screens have been opened on an iPhone through Expo Go. The preview screenshot has been reviewed, and selecting a 15-minute timer preset, closing the picker, and reopening it with the selection retained have been confirmed manually. These observations do not replace the remaining device and accessibility checklist.
 
-Add the preferences milestone, then configure a custom development build. Introduce the macOS companion and define the first authenticated command contract. Live control will replace sample state only after the connection and security boundaries exist.
+Core preferences scenarios have been checked in Expo Go. Configure a custom development build and continue the remaining native and accessibility checks. Introduce the macOS companion and define the first authenticated command contract. Live control will replace sample state only after the connection and security boundaries exist.
 
 ## Planned Follow-up Requirements
 
-These requirements are accepted for future implementation and are not current functionality.
+Language and appearance are implemented, with core behavior checked on an iPhone through Expo Go. The remaining device checklist is tracked in [App Preferences](app-preferences.md). Custom timer duration remains planned.
 
 ### Language and Appearance
+
+Implemented in [App Preferences](app-preferences.md); see its recorded checks and remaining device checklist for validation scope.
 
 - Add a Settings screen with System, English, and Ukrainian language choices.
 - Use the iPhone language in System mode and English when no supported translation is available.
