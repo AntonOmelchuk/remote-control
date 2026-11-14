@@ -4,9 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/app-text';
 import { Icon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
-import { colors, layout, radii, spacing } from '@/design-system/tokens';
+import type { ThemeColors } from '@/design-system/tokens';
+import { layout, radii, spacing } from '@/design-system/tokens';
+import { useTheme, useThemeStyles } from '@/design-system/use-theme';
 import type { SleepTimerMinutes } from '@/features/remote-preview/model/preview-state';
-import { formatSleepTimer, sleepTimerOptions } from '@/features/remote-preview/model/preview-state';
+import { sleepTimerOptions } from '@/features/remote-preview/model/preview-state';
+import { useAppTranslation } from '@/localization/use-app-translation';
 
 type TimerSheetProps = {
   visible: boolean;
@@ -16,6 +19,9 @@ type TimerSheetProps = {
 };
 
 export function TimerSheet({ visible, selectedMinutes, onSelect, onClose }: TimerSheetProps) {
+  const { t, accessibilityLanguage } = useAppTranslation();
+  const { colors } = useTheme();
+  const styles = useThemeStyles(createStyles);
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -26,24 +32,25 @@ export function TimerSheet({ visible, selectedMinutes, onSelect, onClose }: Time
               <View style={styles.heading}>
                 <View style={styles.titleCopy}>
                   <AppText variant="eyebrow" tone="accent">
-                    PREVIEW PRESET
+                    {t('timer.eyebrow')}
                   </AppText>
                   <AppText variant="title" accessibilityRole="header">
-                    Sleep timer
+                    {t('timer.title')}
                   </AppText>
                 </View>
-                <IconButton icon="xmark" label="Close timer picker" onPress={onClose} />
+                <IconButton icon="xmark" label={t('timer.close')} onPress={onClose} />
               </View>
-              <AppText tone="secondary">
-                Choose a preset to try the interface. No countdown will run.
-              </AppText>
+              <AppText tone="secondary">{t('timer.description')}</AppText>
               <View style={styles.options}>
                 {sleepTimerOptions.map((minutes) => (
                   <Pressable
                     key={minutes ?? 'off'}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: minutes === selectedMinutes }}
-                    accessibilityLabel={minutes === null ? 'Timer off' : `${minutes} minutes`}
+                    accessibilityLabel={
+                      minutes === null ? t('timer.off') : t('timer.minutes', { count: minutes })
+                    }
+                    accessibilityLanguage={accessibilityLanguage}
                     onPress={() => onSelect(minutes)}
                     style={({ pressed }) => [
                       styles.option,
@@ -51,7 +58,11 @@ export function TimerSheet({ visible, selectedMinutes, onSelect, onClose }: Time
                       pressed && styles.pressed,
                     ]}
                   >
-                    <AppText variant="label">{formatSleepTimer(minutes)}</AppText>
+                    <AppText variant="label">
+                      {minutes === null
+                        ? t('common.off')
+                        : t('time.minutesShort', { count: minutes })}
+                    </AppText>
                     {minutes === selectedMinutes ? (
                       <Icon name="checkmark" size={18} color={colors.accent} />
                     ) : null}
@@ -66,44 +77,45 @@ export function TimerSheet({ visible, selectedMinutes, onSelect, onClose }: Time
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlay,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  sheet: {
-    maxHeight: '90%',
-    width: '100%',
-    maxWidth: layout.contentWidth,
-    borderTopLeftRadius: radii.lg,
-    borderTopRightRadius: radii.lg,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-  },
-  safeArea: { flexShrink: 1 },
-  content: { padding: spacing.xl, gap: spacing.xl },
-  heading: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  titleCopy: { flex: 1, gap: spacing.sm },
-  options: { gap: spacing.sm },
-  option: {
-    minHeight: 56,
-    padding: spacing.lg,
-    borderRadius: radii.sm,
-    backgroundColor: colors.surfaceRaised,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  selected: { backgroundColor: colors.accentSurface },
-  pressed: { opacity: 0.7 },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+    },
+    sheet: {
+      maxHeight: '90%',
+      width: '100%',
+      maxWidth: layout.contentWidth,
+      borderTopLeftRadius: radii.lg,
+      borderTopRightRadius: radii.lg,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: 'hidden',
+    },
+    safeArea: { flexShrink: 1 },
+    content: { padding: spacing.xl, gap: spacing.xl },
+    heading: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: spacing.lg,
+    },
+    titleCopy: { flex: 1, gap: spacing.sm },
+    options: { gap: spacing.sm },
+    option: {
+      minHeight: 56,
+      padding: spacing.lg,
+      borderRadius: radii.sm,
+      backgroundColor: colors.surfaceRaised,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.md,
+    },
+    selected: { backgroundColor: colors.accentSurface },
+    pressed: { opacity: 0.7 },
+  });

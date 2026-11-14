@@ -2,7 +2,10 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { IconButton } from '@/components/ui/icon-button';
-import { colors, radii, spacing } from '@/design-system/tokens';
+import type { ThemeColors } from '@/design-system/tokens';
+import { radii, spacing } from '@/design-system/tokens';
+import { useThemeStyles } from '@/design-system/use-theme';
+import { useAppTranslation } from '@/localization/use-app-translation';
 
 type VolumeCardProps = {
   volume: number;
@@ -12,13 +15,15 @@ type VolumeCardProps = {
 };
 
 export function VolumeCard({ volume, isMuted, onChangeVolume, onToggleMute }: VolumeCardProps) {
+  const { t, accessibilityLanguage } = useAppTranslation();
+  const styles = useThemeStyles(createStyles);
   const effectiveVolume = isMuted ? 0 : volume;
   return (
     <View style={styles.card}>
       <View style={styles.heading}>
         <View style={styles.valueGroup}>
           <AppText variant="label" tone="secondary">
-            Volume
+            {t('volume.title')}
           </AppText>
           <View style={styles.numberRow}>
             <AppText variant="number">{effectiveVolume}</AppText>
@@ -29,7 +34,7 @@ export function VolumeCard({ volume, isMuted, onChangeVolume, onToggleMute }: Vo
         </View>
         <IconButton
           icon={isMuted ? 'speaker.slash.fill' : 'speaker.wave.2.fill'}
-          label={isMuted ? 'Unmute preview' : 'Mute preview'}
+          label={t(isMuted ? 'volume.unmute' : 'volume.mute')}
           selected={isMuted}
           onPress={onToggleMute}
         />
@@ -37,12 +42,13 @@ export function VolumeCard({ volume, isMuted, onChangeVolume, onToggleMute }: Vo
       <View
         style={styles.bar}
         accessibilityRole="progressbar"
-        accessibilityLabel="Preview volume"
+        accessibilityLabel={t('volume.label')}
+        accessibilityLanguage={accessibilityLanguage}
         accessibilityValue={{
           min: 0,
           max: 100,
           now: effectiveVolume,
-          text: isMuted ? 'Muted' : `${volume} percent`,
+          text: isMuted ? t('volume.muted') : t('volume.value', { volume }),
         }}
       >
         <View style={[styles.fill, { width: `${effectiveVolume}%` }]} />
@@ -50,16 +56,16 @@ export function VolumeCard({ volume, isMuted, onChangeVolume, onToggleMute }: Vo
       <View style={styles.adjustments}>
         <IconButton
           icon="minus"
-          label="Decrease preview volume by 5 percent"
+          label={t('volume.decrease')}
           onPress={() => onChangeVolume(-5)}
           disabled={volume === 0}
         />
         <AppText variant="caption" tone="muted" style={styles.hint}>
-          {isMuted ? `Muted · saved at ${volume}%` : 'A little louder. A little quieter.'}
+          {isMuted ? t('volume.saved', { volume }) : t('volume.hint')}
         </AppText>
         <IconButton
           icon="plus"
-          label="Increase preview volume by 5 percent"
+          label={t('volume.increase')}
           onPress={() => onChangeVolume(5)}
           disabled={volume === 100}
         />
@@ -68,31 +74,32 @@ export function VolumeCard({ volume, isMuted, onChangeVolume, onToggleMute }: Vo
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    padding: spacing.xl,
-    gap: spacing.lg,
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  heading: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  valueGroup: { flex: 1, gap: spacing.xs },
-  numberRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs },
-  unit: { marginLeft: spacing.xs },
-  bar: {
-    height: 12,
-    backgroundColor: colors.surfaceRaised,
-    borderRadius: radii.pill,
-    overflow: 'hidden',
-  },
-  fill: { height: '100%', backgroundColor: colors.accent, borderRadius: radii.pill },
-  adjustments: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  hint: { flex: 1, textAlign: 'center' },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      padding: spacing.xl,
+      gap: spacing.lg,
+      backgroundColor: colors.surface,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    heading: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: spacing.lg,
+    },
+    valueGroup: { flex: 1, gap: spacing.xs },
+    numberRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs },
+    unit: { marginLeft: spacing.xs },
+    bar: {
+      height: 12,
+      backgroundColor: colors.surfaceRaised,
+      borderRadius: radii.pill,
+      overflow: 'hidden',
+    },
+    fill: { height: '100%', backgroundColor: colors.accent, borderRadius: radii.pill },
+    adjustments: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+    hint: { flex: 1, textAlign: 'center' },
+  });

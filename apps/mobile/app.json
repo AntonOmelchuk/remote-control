@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "remotecontrol",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
       "supportsTablet": false
@@ -16,9 +16,19 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#101211",
+          "backgroundColor": "#F5F7F2",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 76,
+          "dark": {
+            "backgroundColor": "#101211"
+          }
+        }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": ["en", "uk"],
+          "supportsRTL": false
         }
       ]
     ],
@@ -27,6 +37,6 @@
       "reactCompiler": true
     },
     "platforms": ["ios"],
-    "backgroundColor": "#101211"
+    "backgroundColor": "#F5F7F2"
   }
 }

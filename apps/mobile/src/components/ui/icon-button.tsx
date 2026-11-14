@@ -2,7 +2,10 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import type { IconName } from '@/components/ui/icon';
 import { Icon } from '@/components/ui/icon';
-import { colors, layout, radii } from '@/design-system/tokens';
+import type { ThemeColors } from '@/design-system/tokens';
+import { layout, radii } from '@/design-system/tokens';
+import { useTheme, useThemeStyles } from '@/design-system/use-theme';
+import { useAppTranslation } from '@/localization/use-app-translation';
 
 type IconButtonProps = {
   icon: IconName;
@@ -23,8 +26,12 @@ export function IconButton({
   selected,
   size = layout.minimumTouchTarget,
 }: IconButtonProps) {
+  const { accessibilityLanguage } = useAppTranslation();
+  const { colors } = useTheme();
+  const styles = useThemeStyles(createStyles);
   return (
     <Pressable
+      accessibilityLanguage={accessibilityLanguage}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled, selected }}
@@ -46,15 +53,16 @@ export function IconButton({
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    minWidth: layout.minimumTouchTarget,
-    minHeight: layout.minimumTouchTarget,
-    borderRadius: radii.pill,
-    backgroundColor: colors.surfaceRaised,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emphasis: { backgroundColor: colors.accent },
-  dimmed: { opacity: 0.45 },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    button: {
+      minWidth: layout.minimumTouchTarget,
+      minHeight: layout.minimumTouchTarget,
+      borderRadius: radii.pill,
+      backgroundColor: colors.surfaceRaised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emphasis: { backgroundColor: colors.accent },
+    dimmed: { opacity: 0.45 },
+  });

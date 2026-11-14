@@ -1,22 +1,30 @@
 import type { TextProps } from 'react-native';
 import { StyleSheet, Text } from 'react-native';
 
-import { colors } from '@/design-system/tokens';
+import { useTheme } from '@/design-system/use-theme';
+import { useAppTranslation } from '@/localization/use-app-translation';
 
 type AppTextProps = TextProps & {
   variant?: keyof typeof typography;
   tone?: 'primary' | 'secondary' | 'muted' | 'accent';
 };
 
-const textColors = {
-  primary: colors.text,
-  secondary: colors.textSecondary,
-  muted: colors.textMuted,
-  accent: colors.accent,
-} as const;
-
 export function AppText({ variant = 'body', tone = 'primary', style, ...props }: AppTextProps) {
-  return <Text {...props} style={[typography[variant], { color: textColors[tone] }, style]} />;
+  const { colors } = useTheme();
+  const { accessibilityLanguage } = useAppTranslation();
+  const textColors = {
+    primary: colors.text,
+    secondary: colors.textSecondary,
+    muted: colors.textMuted,
+    accent: colors.accent,
+  } as const;
+  return (
+    <Text
+      accessibilityLanguage={accessibilityLanguage}
+      {...props}
+      style={[typography[variant], { color: textColors[tone] }, style]}
+    />
+  );
 }
 
 const typography = StyleSheet.create({

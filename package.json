@@ -14,7 +14,8 @@
     "typecheck": "pnpm --dir apps/mobile run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit",
+    "test:unit": "pnpm --dir apps/mobile run test:unit"
   },
   "devDependencies": {
     "husky": "9.1.7",
