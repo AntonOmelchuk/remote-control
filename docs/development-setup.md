@@ -1,226 +1,171 @@
-# Development Setup: iOS and Code Quality
+# Development Setup
 
-This guide applies to the existing Remote Control pnpm workspace with `apps/mobile` on Expo SDK 58.
+This guide describes the current Remote Control workspace. Run commands from the repository root unless a step explicitly says otherwise. For local iOS compilation, signing, and device troubleshooting, see [iOS Development Build](ios-development-build.md).
 
-**Status:** configuration files are prepared. Dependency installation, actual ESLint execution, hooks, and native builds must be verified in the development repository. Source syntax checks on this configuration pack do not replace those checks.
+## Verified Baseline
 
-All commands below run from the repository root.
+The existing workflow includes shared formatting, mobile ESLint and TypeScript checks, 13 platform-independent unit tests, Git hooks, GitHub Actions, and a protection ruleset for `main`.
 
-## 1. Install Dependencies
+On November 16, 2026, the maintainer compiled, installed, and opened a development build on an iPhone XR running iOS 18.7.12. The current shell, preview, and preferences were reported working in that build. This is a manual device check. The existing CI job does not compile iOS. Run the quality checks again before committing changes.
 
-Run these commands before copying the configuration files:
+Live Mac control, discovery, pairing, the macOS Agent, and the browser extension remain planned.
 
-```bash
-pnpm add --workspace-root --save-dev --save-exact prettier husky lint-staged
-pnpm --dir apps/mobile exec expo install eslint eslint-config-expo --dev
-pnpm --dir apps/mobile add --save-dev --save-exact eslint-config-prettier
-pnpm exec husky init
-```
+## Toolchain
 
-The root owns shared formatting and Git-hook tools. The mobile package owns ESLint and the Expo preset. Expo selects compatible ESLint dependencies. Exact root tool versions are recorded in package.json, and the resolved dependency tree is recorded in pnpm-lock.yaml.
+| Tool      | Selected or verified version | Source of truth                          |
+| --------- | ---------------------------- | ---------------------------------------- |
+| Node.js   | 24.22.3                      | `.nvmrc` and the root engine requirement |
+| pnpm      | 11.28.11                     | Root `package.json` `packageManager`     |
+| Expo      | SDK 58                       | Mobile manifest and lockfile             |
+| Xcode     | 27.2, build 27B52            | Local Apple toolchain                    |
+| Swift     | 6.4.2, arm64                 | Selected Xcode toolchain                 |
+| CocoaPods | 1.17.0                       | Verified with `pod --version`            |
+| Git       | 2.41.0                       | Local Git installation                   |
 
-Husky init adds a root prepare script and a default pre-commit hook. The configuration pack replaces that default hook with lint-staged.
+The manifests declare dependencies; `pnpm-lock.yaml` records their resolved versions. Use the project's pins rather than upgrading tools in response to an update banner during unrelated work.
 
-Keep one ESLint configuration in the mobile package: `eslint.config.cjs`. If the Expo command generates an additional `eslint.config.js`, replace it with the supplied configuration rather than keeping both.
+## Prepare a Checkout
 
-## 2. Copy the Prepared Configuration
-
-Copy the pack's contents into the repository root, preserving relative paths and including dotfiles. Its files are:
-
-| Path                           | Purpose                                            |
-| ------------------------------ | -------------------------------------------------- |
-| .prettierrc.json               | Shared formatting policy                           |
-| .prettierignore                | Generated/native build output exclusions           |
-| .editorconfig                  | Editor-independent text settings                   |
-| .lintstagedrc.json             | Formatting for staged root and documentation files |
-| .husky/pre-commit              | Check staged files before committing               |
-| .husky/pre-push                | Run the full local check before pushing            |
-| apps/mobile/.lintstagedrc.json | Mobile linting and formatting                      |
-| apps/mobile/eslint.config.cjs  | Expo ESLint preset and project rules               |
-| apps/mobile/app.json           | iPhone-focused Expo configuration                  |
-| docs/development-setup.md      | This guide                                         |
-
-The supplied app.json:
-
-- targets iOS;
-- names the application Remote Control;
-- uses the remotecontrol URL scheme;
-- retains the supplied version and existing icon/splash asset paths;
-- retains typed routes and the React Compiler setting;
-- removes Android and web configuration;
-- sets supportsTablet to false.
-
-The existing asset files are not included in the pack. They must remain in apps/mobile/assets.
-
-If using the downloaded ZIP, run the following after the commands in step 1:
+With nvm installed, select the project Node.js version:
 
 ```bash
-unzip -o ~/Downloads/remote-control-config.zip -d .
-chmod +x .husky/pre-commit .husky/pre-push
+source "$HOME/.nvm/nvm.sh"
+nvm install
+nvm use
 ```
 
-The unzip command replaces only the files listed in the archive. Review the supplied files before copying them if any of those paths already contain custom configuration.
-
-## 3. Update Package Scripts
-
-In apps/mobile/package.json, replace only the scripts object. Preserve dependencies and devDependencies added by the installation commands:
-
-```json
-{
-  "start": "expo start",
-  "lint": "eslint . --max-warnings=0",
-  "lint:fix": "eslint . --fix --max-warnings=0",
-  "typecheck": "tsc --noEmit"
-}
-```
-
-This removes the starter's web, Android, reset-project, and simulator shortcut commands. A physical-device build command will be added with development-build configuration.
-
-In the root package.json, merge the following scripts while preserving all other fields and installed devDependencies:
-
-```json
-{
-  "dev:mobile": "pnpm --dir apps/mobile run start",
-  "prepare": "husky",
-  "lint": "pnpm --dir apps/mobile run lint",
-  "lint:fix": "pnpm --dir apps/mobile run lint:fix",
-  "typecheck": "pnpm --dir apps/mobile run typecheck",
-  "format": "prettier --write .",
-  "format:check": "prettier --check .",
-  "check": "pnpm format:check && pnpm lint && pnpm typecheck"
-}
-```
-
-Keep the existing packageManager pin and Node.js engine requirement.
-
-The current lint and typecheck commands cover the mobile package. Extend them when protocol packages and the browser extension are created. The format commands already cover supported files throughout the repository.
-
-## 4. Remove Unused Web Starter Code
-
-Preserve the native implementations:
-
-- apps/mobile/src/components/app-tabs.tsx;
-- apps/mobile/src/components/animated-icon.tsx.
-
-Remove their web variants if present:
-
-- apps/mobile/src/components/app-tabs.web.tsx;
-- apps/mobile/src/components/animated-icon.web.tsx.
-
-Review apps/mobile/src/constants/theme.ts. Remove this web stylesheet import if present:
-
-```ts
-import '@/global.css';
-```
-
-Search the mobile source for CSS imports. Once no imports reference them, remove unused starter stylesheets, including:
-
-- apps/mobile/src/components/animated-icon.module.css;
-- apps/mobile/src/global.css, if that is the stylesheet resolved by the @ alias.
-
-Search for other .web files and remove only those confirmed to be unused by the retained native implementation. Setting platforms to ios does not automatically exclude files from TypeScript's include patterns.
-
-Remove the direct web dependencies:
+If pnpm is missing under that Node.js installation, install the version declared by the repository:
 
 ```bash
-pnpm --dir apps/mobile remove react-dom react-native-web
+npm install --global pnpm@11.28.11
 ```
 
-These packages may still appear transitively in the dependency tree. That does not mean the application supports a web target.
-
-Keep expo-web-browser while native components such as ExternalLink use it. It provides native iOS browser and authentication-session integration. A package supporting web is not by itself a reason to remove it.
-
-Keep apps/mobile/tsconfig.json unchanged: strict mode, aliases, and Expo-generated type includes are already configured.
-
-## 5. Run and Review Checks
-
-Run:
+Install the existing workspace and generate Expo's local type declarations:
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm --dir apps/mobile exec expo customize tsconfig.json
-pnpm format
-pnpm lint:fix
+pnpm check
+```
+
+The install runs the root `prepare` script to configure Husky. Do not run `husky init` on an existing checkout: the repository already contains its hooks and configuration.
+
+## Daily Mobile Development
+
+With the development build already installed on the iPhone:
+
+```bash
+pnpm --dir apps/mobile exec expo start --dev-client
+```
+
+Open Remote Control using the development-server QR code. Keep Metro running and the phone on a network that can reach the Mac. JavaScript and TypeScript UI edits do not require recompiling the native app.
+
+For a first device installation or a native dependency change, follow the [native build guide](ios-development-build.md). Starting Metro alone cannot install a native module into an existing binary.
+
+## Configuration Ownership
+
+| Path                             | Responsibility                                                |
+| -------------------------------- | ------------------------------------------------------------- |
+| `package.json`                   | Shared commands, tool versions, and package-manager selection |
+| `pnpm-workspace.yaml`            | JavaScript/TypeScript workspace boundaries                    |
+| `pnpm-lock.yaml`                 | Resolved dependency tree                                      |
+| `.nvmrc`                         | Project Node.js version                                       |
+| `.editorconfig`                  | Editor-independent text settings                              |
+| `.prettierrc.json`               | Shared formatting policy                                      |
+| `.prettierignore`                | Formatting exclusions                                         |
+| `.lintstagedrc.json`             | Formatting for staged root and documentation files            |
+| `.husky/pre-commit`              | Run lint-staged before a commit                               |
+| `.husky/pre-push`                | Run `pnpm check` before a push                                |
+| `apps/mobile/.lintstagedrc.json` | ESLint and formatting for staged mobile files                 |
+| `apps/mobile/eslint.config.cjs`  | Expo lint preset, compatibility adapter, and project rules    |
+| `apps/mobile/tsconfig.json`      | Strict TypeScript configuration and aliases                   |
+| `apps/mobile/app.json`           | Declarative iOS configuration and config plugins              |
+| `apps/mobile/package.json`       | Mobile dependencies and package-level commands                |
+| `apps/mobile/src/package.json`   | ESM scope for source modules imported by Node-based tests     |
+| `.github/workflows/ci.yml`       | Automated quality checks                                      |
+
+The application targets iPhone. The previous Expo demo routes, web components, CSS, and unused images have been replaced by the current shell. App-icon and splash assets remain placeholders. Remaining browser dependencies and the legacy reset script are a separate cleanup task; their presence does not create a web target.
+
+## Quality Commands
+
+| Command             | Purpose                                                 | Rewrites application files? |
+| ------------------- | ------------------------------------------------------- | --------------------------- |
+| `pnpm format`       | Format supported repository files                       | Yes                         |
+| `pnpm format:check` | Verify formatting                                       | No                          |
+| `pnpm lint`         | Run mobile ESLint with zero warnings allowed            | No                          |
+| `pnpm lint:fix`     | Apply available mobile lint fixes                       | Yes                         |
+| `pnpm typecheck`    | Check mobile TypeScript without emitting files          | No                          |
+| `pnpm test:unit`    | Run the Node.js unit tests                              | No                          |
+| `pnpm check`        | Run formatting, lint, types, and unit tests in sequence | No                          |
+
+The unit tests cover preference recovery, storage ordering and failure recovery, translation consistency, language resolution, and selected palette contrast relationships. They do not replace native builds, device checks, or a complete accessibility audit.
+
+Before a commit:
+
+```bash
 pnpm check
 git diff --check
 git status --short
 ```
 
-Expo documents the customize command as the non-server setup step for generated types, including CI. Verify that it produces the required declarations on a clean checkout with the installed Expo version. If declarations remain missing, capture that output before changing tsconfig.
+Review changes produced by formatter and lint fixes before staging them. Extend the lint, type, and test commands when additional packages are implemented.
 
-Formatting and lint:fix modify source files. Review those changes. The separate check command is read-only with respect to application source and fails on formatting issues, lint findings, or TypeScript errors. Dependency-manager policies may perform their own verification.
+## ESLint Compatibility
 
---max-warnings=0 makes lint warnings fail the command. The Expo preset provides the baseline React and hooks rules; project rules additionally reject explicit any and enforce type-only imports. The Prettier compatibility preset disables conflicting formatting rules.
+The current mobile configuration adapts the Expo preset using `fixupConfigRules` from `@eslint/compat`. ESLint 10.14.0 currently passes the project checks, but `eslint-plugin-react` 7.37.5 and `eslint-plugin-import` 2.32.0 still declare peer ranges ending at ESLint 9.
 
-Native builds and runtime behavior remain separate checks. A successful TypeScript/lint run does not prove that the application launches on an iPhone.
+The two peer warnings are an accepted temporary compatibility constraint, not a resolved dependency mismatch. See [ADR 0001](adr/0001-eslint-compatibility.md) for the rationale and removal conditions. Do not suppress the warnings merely to make the dependency report appear clean.
 
-## 6. Verify Git Hooks
+## Git Hooks and GUI Applications
 
-Inspect:
+Check the hook path:
 
 ```bash
 git config --get core.hooksPath
 ```
 
-For this Husky setup, the expected value is .husky/_.
+Expected result: `.husky/_`.
 
-The pre-commit hook runs lint-staged on files staged in Git. Root and mobile configurations are intentionally separate. lint-staged uses the configuration nearest to each staged file; it does not merge the root configuration into the mobile one.
+The pre-commit hook runs lint-staged. Its nearest configuration determines which tasks apply to each staged file; root and mobile configurations are not merged. Files rewritten by tasks are staged automatically. The pre-push hook runs the complete `pnpm check` command.
 
-Stage reviewed changes before testing the hook:
+GUI Git applications can inherit a different `PATH` from an interactive terminal. If a hook reports `pnpm: command not found`, configure the local Husky startup file at `${XDG_CONFIG_HOME:-$HOME/.config}/husky/init.sh` to load nvm:
 
-```bash
-git add .
-pnpm exec lint-staged
-git diff --cached --stat
+```sh
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  . "$NVM_DIR/nvm.sh" --no-use
+  if [ -f .nvmrc ]; then
+    nvm use --silent
+  fi
+fi
 ```
 
-If this is the first commit, lint-staged may report that it cannot create a backup stash because there is no initial commit. Review staged changes carefully.
-
-A run with no staged files does not verify the lint or formatting tasks. Confirm that the output lists the intended tasks.
-
-Test the full pre-push command without pushing:
+This is user-specific machine configuration and is not committed. Test it through Husky's wrapper, which loads that startup file:
 
 ```bash
-sh .husky/pre-push
+env PATH="/usr/bin:/bin:/usr/sbin:/sbin" sh .husky/_/pre-push
 ```
 
-With reviewed changes and passing checks, the initial tooling commit can use:
+A direct `sh .husky/pre-push` tests the check command without exercising the wrapper's environment initialization.
 
-```bash
-git commit -m "chore: configure iOS tooling and quality checks"
-```
+## CI and Pull Requests
 
-Local hooks can be bypassed. GitHub Actions and required status checks will provide the repository-side checks after local configuration is verified. This pack does not include a CI workflow.
+The existing `Quality checks` job installs the pinned toolchain, installs dependencies with a frozen lockfile, generates Expo types, and runs `pnpm check`. It runs on Ubuntu with read-only repository contents permissions, bounded execution time, and action dependencies pinned to commit hashes.
 
-## 7. CI Follow-up
+The active `Protect main` ruleset requires a pull request and a successful `Quality checks` result, blocks force pushes, and protects the branch from deletion. Required review approvals are zero for the current solo-maintainer workflow.
 
-Once local checks pass, add a workflow that:
+Use focused branches, review staged changes, update documentation alongside setup or behavior changes, and squash merge once required checks pass. Record physical-device validation separately: a green Ubuntu job does not demonstrate iOS compilation or installation.
 
-1. selects the repository's Node.js and pnpm versions;
-2. installs dependencies with a frozen lockfile;
-3. generates required Expo types;
-4. runs pnpm check;
-5. uses read-only repository permissions and bounded execution time.
+## Project Language
 
-Configure required status checks on the main branch after the workflow has run successfully. Add Swift build and test jobs when actual native targets exist. Maintain GitHub Actions dependency pins with an update workflow.
-
-## Documentation Update
-
-After applying the configuration and verifying it:
-
-- mark ESLint, Prettier, Husky, and lint-staged as configured in README;
-- keep CI marked as planned until the workflow exists and runs;
-- record the exact installed tool versions in package.json and commit the lockfile;
-- link this guide from README;
-- record native startup as pending until a physical-device build is confirmed.
-
-All source comments, configuration explanations, UI text, logs, test descriptions, documentation, and commit messages are written in English.
+Use English for documentation, code comments, developer-facing messages, tests, commits, and pull requests. User-facing copy and accessibility labels use the bundled English and Ukrainian translation resources.
 
 ## References
 
+- [Expo CLI](https://docs.expo.dev/more/expo-cli/)
+- [Expo typed routes and generated declarations](https://docs.expo.dev/router/reference/typed-routes/)
 - [Expo ESLint and Prettier](https://docs.expo.dev/guides/using-eslint/)
-- [Expo generated types](https://docs.expo.dev/router/reference/typed-routes/)
-- [Expo platform configuration](https://docs.expo.dev/versions/latest/config/app/)
-- [Expo WebBrowser](https://docs.expo.dev/versions/latest/sdk/webbrowser/)
-- [Prettier installation](https://prettier.io/docs/install/)
-- [Husky setup](https://typicode.github.io/husky/get-started.html)
-- [lint-staged monorepo configuration](https://github.com/lint-staged/lint-staged)
+- [Husky startup files](https://typicode.github.io/husky/how-to.html)
+- [lint-staged](https://github.com/lint-staged/lint-staged)
+- [iOS development build and troubleshooting](ios-development-build.md)

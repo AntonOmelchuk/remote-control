@@ -4,7 +4,7 @@ An iPhone remote for controlling a MacBook over a local network.
 
 The product provides convenient access to audio, video playback, and selected system actions from a phone. The engineering goals are maintainable code, a secure command protocol, and predictable behavior when connectivity is interrupted.
 
-**Status: mobile shell and core preferences checked in Expo Go.** The iOS client includes a disconnected home screen, a connection guide, an interactive remote preview, and Settings. Switching to Ukrainian, light appearance, following iPhone appearance changes, and restoring explicit language/theme choices after restarting Expo Go have been manually confirmed. The maintainer's `pnpm check` passes formatting, ESLint, TypeScript, and all 13 unit tests. An iOS JavaScript export also passed in the implementation workspace. Preview actions update local UI state only. Git hooks, GitHub Actions, and the protection ruleset for `main` are configured. Two upstream ESLint peer-dependency warnings remain documented in an ADR. A custom native build, signing, live Mac control, pairing, and the browser extension remain pending.
+**Status: mobile development build running on a physical iPhone.** The iOS client includes a disconnected home screen, a connection guide, an interactive remote preview, and Settings with persistent English/Ukrainian language and system/light/dark appearance choices. On November 16, 2026, the maintainer compiled, signed, installed, and opened the development build on an iPhone XR running iOS 18.7.12, then reported the current functionality working. Preview actions still update local UI state only. The most recent recorded quality run passed formatting, ESLint, TypeScript, and all 13 unit tests. Git hooks, GitHub Actions, and the protection ruleset for `main` are configured. Two upstream ESLint peer warnings remain documented in an ADR. Live Mac control, pairing, the browser extension, native CI, and TestFlight distribution remain planned.
 
 ## Contents
 
@@ -25,24 +25,25 @@ The product provides convenient access to audio, video playback, and selected sy
 
 ## Features and Status
 
-| Feature                | Scope                                                                      | Status                                                         |
-| ---------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Mobile client          | React Native, TypeScript, Expo Router                                      | Launched on an iPhone through Expo Go                          |
-| Interactive preview    | Volume, mute, playback state, seeking, and timer preset selection          | Implemented with local sample state only                       |
-| Pairing                | Add an iPhone using a QR code and confirmation on the Mac                  | Planned for MVP                                                |
-| Audio control          | Volume, mute, and current state                                            | Planned for MVP                                                |
-| YouTube                | Play/pause, seeking, and tab selection                                     | Planned for MVP                                                |
-| Timer                  | Pause the selected video after a custom duration                           | Planned for MVP; preview currently uses presets                |
-| Localization           | System language, English, and Ukrainian; typed bundled resources           | Ukrainian switching checked in Expo Go; resolution unit-tested |
-| Appearance             | System, light, and dark themes                                             | Light mode and system appearance changes checked in Expo Go    |
-| Preferences            | Persistent language and appearance choices                                 | Explicit selections restored after restarting Expo Go          |
-| Video websites         | Playback controls and next episode                                         | After MVP; a separate site adapter is required                 |
-| Mac sleep and shutdown | Standard system actions                                                    | After API and permission validation                            |
-| Brightness             | Hardware display brightness                                                | Experimental; requires testing on the target MacBook           |
-| Touchpad               | Pointer movement, clicking, and scrolling                                  | Later milestone                                                |
-| Quality tooling        | ESLint, Prettier, Husky, and lint-staged                                   | Configured; pre-commit and pre-push verified                   |
-| CI                     | Automated formatting, lint, type checks, and unit tests                    | Existing workflow verified; unit tests added to `pnpm check`   |
-| Branch protection      | Pull requests, required CI, deletion protection, and force-push protection | Active for `main`                                              |
+| Feature                | Scope                                                                      | Status                                                               |
+| ---------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Mobile client          | React Native, TypeScript, Expo Router                                      | Compiled, signed, installed, and opened on iPhone XR                 |
+| iOS development build  | Local Xcode compilation, signing, installation, and Metro connection       | Manually verified on iPhone XR, iOS 18.7.12                          |
+| Interactive preview    | Volume, mute, playback state, seeking, and timer preset selection          | Implemented with local sample state only                             |
+| Pairing                | Add an iPhone using a QR code and confirmation on the Mac                  | Planned for MVP                                                      |
+| Audio control          | Volume, mute, and current state                                            | Planned for MVP                                                      |
+| YouTube                | Play/pause, seeking, and tab selection                                     | Planned for MVP                                                      |
+| Timer                  | Pause the selected video after a custom duration                           | Planned for MVP; preview currently uses presets                      |
+| Localization           | System language, English, and Ukrainian; typed bundled resources           | Implemented; prior detailed checks in Expo Go and native smoke check |
+| Appearance             | System, light, and dark themes                                             | Implemented; prior detailed checks in Expo Go and native smoke check |
+| Preferences            | Persistent language and appearance choices                                 | Persistence checked in Expo Go; native smoke check completed         |
+| Video websites         | Playback controls and next episode                                         | After MVP; a separate site adapter is required                       |
+| Mac sleep and shutdown | Standard system actions                                                    | After API and permission validation                                  |
+| Brightness             | Hardware display brightness                                                | Experimental; requires testing on the target MacBook                 |
+| Touchpad               | Pointer movement, clicking, and scrolling                                  | Later milestone                                                      |
+| Quality tooling        | ESLint, Prettier, Husky, and lint-staged                                   | Configured; pre-commit and pre-push verified                         |
+| CI                     | Automated formatting, lint, type checks, and unit tests                    | Existing workflow verified; unit tests added to `pnpm check`         |
+| Branch protection      | Pull requests, required CI, deletion protection, and force-push protection | Active for `main`                                                    |
 
 The first target configuration is a physical iPhone, an Apple Silicon MacBook, and Chrome. Support for additional devices and browsers will follow validation of the primary workflow.
 
@@ -99,33 +100,34 @@ These names describe the intended organization. Concrete files and interfaces wi
 
 ## Repository Structure
 
-| Path                                       | Responsibility                                                          | Status                                           |
-| ------------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------ |
-| `apps/mobile/`                             | React Native mobile application                                         | Created                                          |
-| `apps/mobile/src/app/`                     | Root navigator and thin route entry points                              | Implemented                                      |
-| `apps/mobile/src/components/`              | Shared UI primitives                                                    | Implemented                                      |
-| `apps/mobile/src/design-system/`           | Light/dark palettes, design tokens, and theme-aware style hooks         | Implemented                                      |
-| `apps/mobile/src/localization/`            | Typed English/Ukrainian resources and a language-bound translation hook | Implemented                                      |
-| `apps/mobile/src/preferences/`             | Preference types, restoration, context, and serialized storage writes   | Implemented                                      |
-| `apps/mobile/src/features/settings/`       | Language and appearance controls                                        | Implemented                                      |
-| `apps/mobile/src/package.json`             | ESM scope for source modules used by Node-based tests                   | Configured                                       |
-| `apps/mobile/tests/`                       | Preferences, localization, and palette contrast tests                   | 13 tests passing in the implementation workspace |
-| `apps/mobile/src/features/connection/`     | Disconnected home, Mac illustration, and connection guide               | Implemented; networking planned                  |
-| `apps/mobile/src/features/remote-preview/` | Preview screen, cards, timer picker, and isolated UI state              | Implemented; local preview only                  |
-| `apps/mobile/modules/remote-network/`      | Swift Expo Module for networking                                        | Planned                                          |
-| `apps/macos/`                              | Agent, SwiftUI interface, and system adapters                           | Planned                                          |
-| `apps/browser-extension/`                  | Chrome extension and media adapters                                     | Planned                                          |
-| `packages/protocol/`                       | Command schemas, TypeScript models, and fixtures                        | Planned                                          |
-| `packages/remote-core/`                    | Shared Swift package                                                    | Planned                                          |
-| `docs/`                                    | Technical explanations and guides                                       | Added incrementally                              |
-| `package.json`                             | Root commands and tooling configuration                                 | Configured                                       |
-| `pnpm-workspace.yaml`                      | pnpm workspace boundaries                                               | Configured                                       |
-| `pnpm-lock.yaml`                           | Resolved dependency tree                                                | Created                                          |
-| `.nvmrc`                                   | Selected Node.js version                                                | Configured                                       |
-| `.husky/`                                  | Pre-commit and pre-push commands                                        | Both hooks verified                              |
-| `apps/mobile/eslint.config.cjs`            | Expo lint rules and compatibility adapter                               | Configured                                       |
-| `.prettierrc.json`                         | Shared formatting policy                                                | Configured                                       |
-| `.github/workflows/ci.yml`                 | GitHub Actions formatting, lint, and type checks                        | Implemented and verified                         |
+| Path                                       | Responsibility                                                          | Status                                        |
+| ------------------------------------------ | ----------------------------------------------------------------------- | --------------------------------------------- |
+| `apps/mobile/`                             | React Native mobile application                                         | Native development build running on iPhone XR |
+| `apps/mobile/ios/`                         | Generated Xcode project and CocoaPods integration                       | Generated locally; ignored by Git             |
+| `apps/mobile/src/app/`                     | Root navigator and thin route entry points                              | Implemented                                   |
+| `apps/mobile/src/components/`              | Shared UI primitives                                                    | Implemented                                   |
+| `apps/mobile/src/design-system/`           | Light/dark palettes, design tokens, and theme-aware style hooks         | Implemented                                   |
+| `apps/mobile/src/localization/`            | Typed English/Ukrainian resources and a language-bound translation hook | Implemented                                   |
+| `apps/mobile/src/preferences/`             | Preference types, restoration, context, and serialized storage writes   | Implemented                                   |
+| `apps/mobile/src/features/settings/`       | Language and appearance controls                                        | Implemented                                   |
+| `apps/mobile/src/package.json`             | ESM scope for source modules used by Node-based tests                   | Configured                                    |
+| `apps/mobile/tests/`                       | Preferences, localization, and palette contrast tests                   | 13 tests passed locally and through CI        |
+| `apps/mobile/src/features/connection/`     | Disconnected home, Mac illustration, and connection guide               | Implemented; networking planned               |
+| `apps/mobile/src/features/remote-preview/` | Preview screen, cards, timer picker, and isolated UI state              | Implemented; local preview only               |
+| `apps/mobile/modules/remote-network/`      | Swift Expo Module for networking                                        | Planned                                       |
+| `apps/macos/`                              | Agent, SwiftUI interface, and system adapters                           | Planned                                       |
+| `apps/browser-extension/`                  | Chrome extension and media adapters                                     | Planned                                       |
+| `packages/protocol/`                       | Command schemas, TypeScript models, and fixtures                        | Planned                                       |
+| `packages/remote-core/`                    | Shared Swift package                                                    | Planned                                       |
+| `docs/`                                    | Technical explanations and guides                                       | Added incrementally                           |
+| `package.json`                             | Root commands and tooling configuration                                 | Configured                                    |
+| `pnpm-workspace.yaml`                      | pnpm workspace boundaries                                               | Configured                                    |
+| `pnpm-lock.yaml`                           | Resolved dependency tree                                                | Created                                       |
+| `.nvmrc`                                   | Selected Node.js version                                                | Configured                                    |
+| `.husky/`                                  | Pre-commit and pre-push commands                                        | Both hooks verified                           |
+| `apps/mobile/eslint.config.cjs`            | Expo lint rules and compatibility adapter                               | Configured                                    |
+| `.prettierrc.json`                         | Shared formatting policy                                                | Configured                                    |
+| `.github/workflows/ci.yml`                 | GitHub Actions formatting, lint, and type checks                        | Implemented and verified                      |
 
 The pnpm workspace manages JavaScript and TypeScript packages with their own `package.json` files. Swift projects can live in the same Git repository, while Swift Package Manager and Xcode manage their dependencies and builds.
 
@@ -133,15 +135,16 @@ YAML is a structured data format. pnpm reads `pnpm-workspace.yaml` to determine 
 
 ## Development Environment
 
-The initial development environment is:
+The locally verified development environment is:
 
-| Tool    | Version           |
-| ------- | ----------------- |
-| Node.js | 24.22.3           |
-| pnpm    | 11.28.11          |
-| Xcode   | 27.2, build 27B52 |
-| Swift   | 6.4.2, arm64      |
-| Git     | 2.41.0            |
+| Tool      | Version           |
+| --------- | ----------------- |
+| Node.js   | 24.22.3           |
+| pnpm      | 11.28.11          |
+| Xcode     | 27.2, build 27B52 |
+| Swift     | 6.4.2, arm64      |
+| Git       | 2.41.0            |
+| CocoaPods | 1.17.0            |
 
 The mobile starter was requested using `--template default@sdk-58`. Refer to `apps/mobile/package.json` and the lockfile for the actual application dependencies.
 
@@ -168,45 +171,48 @@ Install dependencies:
 pnpm install --frozen-lockfile
 ```
 
-For the first Expo startup:
-
-```bash
-pnpm --dir apps/mobile exec expo start --offline
-```
-
-Expo generates environment types during startup. Once Metro is ready, stop it with Ctrl+C and run the TypeScript check:
-
-```bash
-pnpm typecheck
-```
-
-The `--offline` flag disables external network checks in the Expo CLI. It does not produce a standalone release build.
-
-For subsequent Metro development sessions:
-
-```bash
-pnpm dev:mobile
-```
-
-The shell can be opened on an iPhone through Expo Go. Installation of a custom development build and signing remain pending. Commands for running the macOS Agent and browser extension will be added when those components exist.
-
-### Initial Setup Notes
-
-The initial TypeScript check reported missing CSS declarations and an incompatible `ref` type in starter web components. A subsequent local check completed without errors.
-
-The latest combined local check passes: formatting, ESLint, TypeScript, and all 13 unit tests. The home and preview screens have been opened on a physical iPhone through Expo Go, and timer preset selection has been manually verified. A custom native build has not yet been compiled or installed.
-
-After installing dependencies in a clean checkout, generate the required Expo types before running `pnpm check`:
+Generate the local Expo type declarations and run the quality checks:
 
 ```bash
 pnpm --dir apps/mobile exec expo customize tsconfig.json
+pnpm check
 ```
 
-GitHub Actions performs this step automatically before running the quality checks.
+### First Physical-Device Build
+
+With Xcode, CocoaPods, pairing, Developer Mode, and an Apple Development signing identity configured:
+
+```bash
+pnpm --dir apps/mobile exec expo run:ios --device
+```
+
+Select the physical iPhone and the intended development team if prompted. Expo generates the ignored iOS project when absent, compiles and signs the app, installs it, and attempts to launch it. A free Personal Team can be used for local testing; its provisioning profiles require renewal after seven days.
+
+See [iOS Development Build](docs/ios-development-build.md) for the complete device, signing, trust, and troubleshooting steps. A simulator runtime is not required for this physical-device workflow.
+
+### Daily Development
+
+After the native build is installed:
+
+```bash
+pnpm --dir apps/mobile exec expo start --dev-client
+```
+
+Scan the terminal QR code using the iPhone camera and open it in Remote Control. Keep the Mac and iPhone on a reachable local network and allow local-network access if requested. The installed app loads its development JavaScript from Metro. Ordinary UI, style, and translation edits do not require another native compilation.
+
+Rebuild after native dependency or configuration changes, regenerating the native project from configuration as described in the build guide. Durable native settings belong in `app.json` and config plugins; `apps/mobile/ios/` is generated and ignored.
+
+### Validation Status
+
+The home, preview, and preferences were first checked in Expo Go. Explicit language/theme persistence and system appearance changes were manually verified there. On November 16, 2026, the custom development build launched on iPhone XR with Metro, and the maintainer reported its existing functionality working. A separate exhaustive native regression matrix has not been recorded.
+
+The most recent recorded `pnpm check` passed all 13 unit tests alongside formatting, lint, and TypeScript. Run the checks again before committing changes. The existing CI job generates Expo types before running those checks; it does not compile iOS. TestFlight, standalone release behavior, broader device coverage, and accessibility checks remain separate work.
+
+Commands for running the macOS Agent and browser extension will be added when those components exist.
 
 ## Code Quality
 
-Local quality checks and the existing GitHub Actions workflow are configured. This milestone adds 13 platform-independent unit tests to `pnpm check`, so the same workflow and pre-push hook will run them. Native build checks and connected command contract tests remain planned.
+Local quality checks and GitHub Actions are configured. `pnpm check` includes 13 platform-independent unit tests, and the pre-push hook runs the same command. Local iOS compilation and launch have been manually verified; automated native builds and connected command contract tests remain planned.
 
 | Mechanism                    | Responsibility                                                        | Current Status                                           |
 | ---------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------- |
@@ -220,7 +226,7 @@ Local quality checks and the existing GitHub Actions workflow are configured. Th
 | Unit tests                   | Preference recovery, persistence ordering, localization, and contrast | 13 tests pass; included in `pnpm check`                  |
 | Contract tests               | Connected command contracts                                           | Planned                                                  |
 | Swift formatting and linting | Swift code consistency                                                | Planned when Swift targets exist                         |
-| Native build checks          | Compilation of actual Apple targets                                   | Planned                                                  |
+| Native build checks          | iOS compilation, installation, and launch                             | Manually verified on iPhone XR; native CI planned        |
 | Required status checks       | Successful CI checks before merging                                   | Active for `main`; `Quality checks` is required          |
 
 ### Local Commands
@@ -352,7 +358,7 @@ The timer runs on the Mac and does not depend on the iPhone screen remaining ope
 - Browser policies may restrict play and fullscreen requests.
 - iOS may suspend the application in the background; returning to the foreground requires synchronization.
 - Unsaved-file dialogs may delay or cancel a normal Mac shutdown.
-- A native development build requires initial signing configuration.
+- Local development builds require signing and device trust. Personal Team provisioning expires after seven days and requires reprovisioning, rebuilding, and reinstalling.
 - TestFlight builds have a limited availability period; distribution will be configured separately.
 
 ## Documentation
@@ -363,7 +369,8 @@ README is the entry point: purpose, current status, getting started, the main ar
 
 Existing documentation:
 
-- [Development Setup](docs/development-setup.md): the initial iOS and tooling setup guide. Read ADR 0001 for the subsequent ESLint compatibility addition.
+- [Development Setup](docs/development-setup.md): current checkout setup, quality tooling, Git hooks, and CI.
+- [iOS Development Build](docs/ios-development-build.md): local compilation, device pairing, signing, Metro, troubleshooting, and recorded validation.
 - [ADR 0001](docs/adr/0001-eslint-compatibility.md): the temporary ESLint plugin compatibility decision.
 - [Mobile Shell](docs/mobile-shell.md): screen responsibilities, preview behavior, design tokens, validation, and remaining work.
 - [App Preferences](docs/app-preferences.md): localization, theming, storage guarantees, unit tests, and the device checklist.
@@ -396,8 +403,8 @@ Comments should explain intent, constraints, or non-obvious decisions rather tha
 
 1. Completed: baseline local quality tooling, verified Git hooks, GitHub Actions, and the active protection ruleset for `main`.
 2. Implemented: the mobile shell and local remote preview; unused starter UI and images removed. Review the legacy reset script and remaining browser dependencies separately.
-3. Implemented and checked in Expo Go: persistent preferences, Ukrainian switching, light appearance, system appearance changes, and restoration after restart. Continue the remaining accessibility and native-build checks.
-4. Configure a custom development build and install it on a physical iPhone.
+3. Implemented: persistent language and appearance preferences, with detailed Expo Go checks and a subsequent native smoke check. Continue accessibility and broader device validation.
+4. Completed locally: compile, sign, install, and launch a custom development build on iPhone XR. Native CI and distribution remain planned.
 5. Create the macOS Agent and validate system APIs.
 6. Implement pairing, a secure command, and confirmed volume state.
 7. Add the Chrome extension and YouTube integration.
@@ -414,6 +421,10 @@ The planned demonstration covers connecting to a Mac, changing volume, controlli
 
 ## References
 
+- [Expo: SDK 58 development client](https://docs.expo.dev/versions/v58.0.0/sdk/dev-client/)
+- [Expo: local development builds](https://docs.expo.dev/guides/local-app-development/)
+- [Expo: Continuous Native Generation](https://docs.expo.dev/workflow/continuous-native-generation/)
+- [Apple: Personal Team and developer account](https://developer.apple.com/help/account/basics/about-your-developer-account)
 - [Expo: monorepos](https://docs.expo.dev/guides/monorepos/)
 - [Expo: TypeScript](https://docs.expo.dev/guides/typescript/)
 - [Expo: generated types](https://docs.expo.dev/router/reference/typed-routes/)
