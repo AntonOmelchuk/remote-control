@@ -8,7 +8,7 @@ The existing workflow includes shared formatting, mobile ESLint and TypeScript c
 
 On November 16, 2026, the maintainer compiled, installed, and opened a development build on an iPhone XR running iOS 18.7.12. The current shell, preview, and preferences were reported working in that build. This is a manual device check. The existing CI job does not compile iOS. Run the quality checks again before committing changes.
 
-Live Mac control, discovery, pairing, the macOS Agent, and the browser extension remain planned.
+On November 18, 2026, the maintainer passed the macOS shell's native check and confirmed launch, Quit and relaunch, light/dark appearance, and both bundled languages. The separate macOS CI workflow awaits its first run. Live Mac control, discovery, pairing, and the browser extension remain planned.
 
 ## Toolchain
 
@@ -61,6 +61,19 @@ pnpm --dir apps/mobile exec expo start --dev-client
 Open Remote Control using the development-server QR code. Keep Metro running and the phone on a network that can reach the Mac. JavaScript and TypeScript UI edits do not require recompiling the native app.
 
 For a first device installation or a native dependency change, follow the [native build guide](ios-development-build.md). Starting Metro alone cannot install a native module into an existing binary.
+
+## Native Mac Development
+
+The Mac shell uses its own XcodeGen specification and Makefile. From the repository root:
+
+```bash
+make -C apps/macos check
+make -C apps/macos run
+```
+
+`check` runs strict Swift lint, generates the Xcode project, and compiles the Debug app. `run` builds and opens it. XcodeGen 2.46.0 is installed locally; the specification requires at least that version. Native lint uses the formatter bundled with Xcode. Generated projects and build output are ignored.
+
+Run the native check alongside `pnpm check` for Mac source changes. The existing pnpm scripts remain focused on mobile and repository formatting. See [macOS Agent Shell](macos-agent-shell.md) for recorded local validation, remaining checks, and the separate macOS CI workflow.
 
 ## Configuration Ownership
 
@@ -169,3 +182,4 @@ Use English for documentation, code comments, developer-facing messages, tests, 
 - [Husky startup files](https://typicode.github.io/husky/how-to.html)
 - [lint-staged](https://github.com/lint-staged/lint-staged)
 - [iOS development build and troubleshooting](ios-development-build.md)
+- [macOS Agent shell and native checks](macos-agent-shell.md)

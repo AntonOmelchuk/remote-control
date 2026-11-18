@@ -1,0 +1,45 @@
+name: macOS Agent
+
+on:
+  push:
+    paths:
+      - 'apps/macos/**'
+      - '.github/workflows/macos.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/macos/**'
+      - '.github/workflows/macos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    name: macOS build
+    runs-on: macos-26
+    timeout-minutes: 15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up project generator
+        run: brew install xcodegen
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun swift --version
+          xcodegen --version
+
+      - name: Check Swift and build application
+        run: make -C apps/macos check

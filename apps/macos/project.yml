@@ -1,0 +1,44 @@
+name: RemoteControlAgent
+
+options:
+  minimumXcodeGenVersion: 2.46.0
+  developmentLanguage: en
+  deploymentTarget:
+    macOS: '15.0'
+  createIntermediateGroups: true
+
+configs:
+  Debug: debug
+  Release: release
+
+targets:
+  RemoteControlAgent:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources
+      - path: Resources
+        excludes:
+          - Info.plist
+    settings:
+      base:
+        SWIFT_VERSION: '6.0'
+        SWIFT_STRICT_CONCURRENCY: complete
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: '-'
+        ENABLE_HARDENED_RUNTIME: YES
+        PRODUCT_NAME: RemoteControlAgent
+        PRODUCT_BUNDLE_IDENTIFIER: com.antonomelchuk.remotecontrol.agent
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Resources/Info.plist
+
+schemes:
+  RemoteControlAgent:
+    build:
+      targets:
+        RemoteControlAgent: all
+    run:
+      config: Debug
