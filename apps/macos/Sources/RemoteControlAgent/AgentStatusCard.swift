@@ -4,7 +4,7 @@ import SwiftUI
 struct AgentStatusCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Setup only")
+            Text("Phone connection")
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 10)

@@ -1,10 +1,12 @@
 import Foundation
+import RemoteCore
 import SwiftUI
 
 @MainActor
 struct AgentMenuView: View {
     @Environment(\.colorScheme) private var colorScheme
 
+    let audio: AudioOutputService
     let onQuit: () -> Void
 
     private var accent: Color {
@@ -18,21 +20,26 @@ struct AgentMenuView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            header
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    header
 
-            Text("Your Mac, within reach.")
-                .font(.title2.weight(.semibold))
-                .fixedSize(horizontal: false, vertical: true)
+                    Text("Your Mac, within reach.")
+                        .font(.title2.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
 
-            AgentStatusCard()
+                    AudioControlCard(service: audio)
+                        .tint(accent)
+                    AgentStatusCard()
+                }
+                .padding(20)
+            }
 
-            Divider()
-
-            footer
+            Divider().padding(.horizontal, 20)
+            footer.padding(20)
         }
-        .padding(20)
-        .frame(width: 360)
+        .frame(width: 360, height: 640)
         .background(.regularMaterial)
     }
 

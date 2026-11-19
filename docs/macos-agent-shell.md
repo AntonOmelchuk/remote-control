@@ -4,9 +4,9 @@
 
 This milestone introduces the Mac application's lifecycle and presentation layer. It adds a menu-bar panel, an explicit setup-only connection status, and a Quit action. The UI follows macOS appearance and preferred application language using bundled English and Ukrainian resources. Phone preference choices do not synchronize with this shell.
 
-**Local validation passed on November 18, 2026.** The maintainer ran `make -C apps/macos check` successfully and confirmed the menu-bar panel, Quit and relaunch, light/dark appearance, and both bundled languages. The new macOS CI workflow awaits its first run. These local results do not establish accessibility, distribution, or broader OS/device coverage.
+**Local validation passed on November 18, 2026.** The maintainer ran `make -C apps/macos check` successfully and confirmed the menu-bar panel, Quit and relaunch, light/dark appearance, and both bundled languages. Both GitHub jobs subsequently passed for the shell baseline. The next local-audio milestone is documented separately in [macOS Audio Control](macos-audio-control.md). These local results do not establish accessibility, distribution, or broader OS/device coverage.
 
-The shell opens no listeners, advertises no Bonjour service, stores no pairing secrets, and sends no media, input, or power commands. A running panel is not evidence that the phone can control the Mac. Its connection status explicitly says connections are unavailable.
+The Agent opens no network listeners, advertises no Bonjour service, stores no pairing secrets, and sends no media, input, or power commands. The local-audio milestone adds hardware-property observers and local sound controls. A running panel is not evidence that the phone can control the Mac. Its connection status explicitly says connections are unavailable.
 
 ## Architecture
 
@@ -14,7 +14,7 @@ The application is a native SwiftUI target under `apps/macos`. `RemoteControlAge
 
 `MenuBarExtra` uses the window presentation style so the panel can contain ordinary SwiftUI views. `LSUIElement` identifies the application as a menu-bar utility without a Dock icon. UI declarations use explicit `@MainActor` isolation and compile in Swift 6 language mode with warnings treated as errors.
 
-There are no domain, application-service, networking, or system-adapter layers yet. Introduce them when actual command behavior is implemented. The intended future dependency direction is from the SwiftUI composition root into application use cases, with native adapters implementing the required boundaries. UI views should not become the command server.
+The shell baseline introduced presentation and lifecycle only. The audio milestone now adds its first application service and native adapter; see [macOS Audio Control](macos-audio-control.md) for the current boundaries. The intended future dependency direction is from the SwiftUI composition root into application use cases, with native adapters implementing the required boundaries. UI views should not become the command server.
 
 ## Visual and Language Behavior
 
@@ -44,15 +44,15 @@ make -C apps/macos check
 git diff --check
 ```
 
-The first command retains the existing mobile and documentation checks. The second runs the formatter's strict lint mode, generates the Xcode project, and compiles the native app. If formatting needs changes, apply them with `make -C apps/macos format`, review the diff, and rerun the native check.
+The first command retains the existing mobile and documentation checks. The second now runs strict Swift lint, the shared core tests, project generation, and the native app build. If formatting needs changes, apply them with `make -C apps/macos format`, review the diff, and rerun the native check.
 
 The new `.github/workflows/macos.yml` defines `macOS build` on `macos-26`, selecting the documented Xcode 26.6 installation. The maintainer's local Xcode is 27.2. The workflow logs tool versions, installs XcodeGen through Homebrew, and runs the same native check as local development. Its generator installation follows Homebrew rather than an exact package lock; the specification enforces the minimum supported generator version. Toolchain changes require review if generation or formatting behavior changes.
 
-The job has read-only repository contents permissions, does not persist checkout credentials, and has a 15-minute timeout. Push and pull-request path filters cover `apps/macos/**` and the workflow itself. The existing Ubuntu `Quality checks` job remains separate.
+The job has read-only repository contents permissions, does not persist checkout credentials, and has a 15-minute timeout. Push and pull-request path filters now cover `apps/macos/**`, `packages/remote-core/**`, and the workflow itself. The existing Ubuntu `Quality checks` job remains separate.
 
 The new status is **not yet a required branch-protection check**. Do not make a path-filtered workflow an unconditional required check: a pull request outside those paths may not produce that status. Define an always-reporting job before changing branch-protection requirements.
 
-The current shell has no business logic to justify a placeholder unit-test suite. Compilation and manual lifecycle checks are the relevant first checks. Add focused tests for future authentication, permissions, state transitions, bounded commands, and timer behavior when those contracts exist.
+The initial shell used compilation and lifecycle checks. The audio milestone adds 15 isolated Swift core tests for command safety and observer lifecycle. Future authentication, permissions, and timer contracts require their own focused tests.
 
 ## Recorded Validation
 
@@ -88,7 +88,7 @@ The following checks remain unrecorded:
 - Explicit confirmation that the app has no Dock icon.
 - VoiceOver labels, keyboard focus, and the Quit keyboard shortcut.
 - Generated-file exclusions verified against the actual post-build Git status.
-- First successful `macOS build` workflow run.
+- The expanded audio workflow run; the shell baseline already passed both GitHub jobs.
 - A wider device/OS matrix, including the configured minimum macOS deployment version.
 
 Local native checks are separate from `pnpm check`. Run the repository checks again before committing this milestone; the existing 13 mobile unit tests do not test the macOS UI.

@@ -11,6 +11,10 @@ configs:
   Debug: debug
   Release: release
 
+packages:
+  RemoteCore:
+    path: ../../packages/remote-core
+
 targets:
   RemoteControlAgent:
     type: application
@@ -20,6 +24,8 @@ targets:
       - path: Resources
         excludes:
           - Info.plist
+    dependencies:
+      - package: RemoteCore
     settings:
       base:
         SWIFT_VERSION: '6.0'

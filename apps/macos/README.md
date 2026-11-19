@@ -1,8 +1,8 @@
 # Remote Control macOS Agent
 
-The native Mac companion for Remote Control. This milestone provides a SwiftUI menu-bar application with a setup status, English/Ukrainian copy, and an explicit Quit action.
+The native Mac companion for Remote Control. The application provides a SwiftUI menu-bar panel with local volume and mute controls, phone-connection status, English/Ukrainian copy, and an explicit Quit action.
 
-**Validation status:** on November 18, 2026, the maintainer passed `make -C apps/macos check` (strict Swift lint, project generation, and a successful native build) and confirmed launch, Quit and relaunch, light/dark appearance, and both English and Ukrainian interface text. The new macOS CI job has not yet run. VoiceOver, keyboard focus, and a broader device/OS matrix remain unverified. The working iOS development build is a separate completed milestone.
+**Validation status:** on November 18, 2026, the maintainer passed `make -C apps/macos check` (strict Swift lint, project generation, and a successful native build) and confirmed launch, Quit and relaunch, light/dark appearance, and both English and Ukrainian interface text. Both GitHub jobs subsequently passed for that shell baseline. On November 19, 2026, the expanded native check passed with all 15 shared tests and a successful audio application build. Manual checks confirmed volume control, mute/unmute preserving volume, external volume synchronization, and removal of the transient spinner and tick marks on MacBook Pro Speakers. Button flicker is deferred; output switching and the expanded native CI execution remain unverified; see [macOS Audio Control](../../docs/macos-audio-control.md). VoiceOver, keyboard focus, and a broader device/OS matrix remain unverified. The working iOS development build is a separate completed milestone.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ The native Mac companion for Remote Control. This milestone provides a SwiftUI m
 - XcodeGen 2.46.0 or later; 2.46.0 is installed on the maintainer's Mac.
 - The formatter bundled with the selected Xcode toolchain (`xcrun swift-format`).
 
-No external Swift package dependencies are introduced. The current local build uses ad hoc signing and does not require an Apple development team. Developer ID signing and notarized distribution are future work.
+The application references the local `packages/remote-core` Swift package. No external Swift package dependencies are introduced. The current local build uses ad hoc signing and does not require an Apple development team. Developer ID signing and notarized distribution are future work.
 
 ## Build and Run
 
@@ -22,7 +22,7 @@ make -C apps/macos check
 make -C apps/macos run
 ```
 
-`check` lints Swift, generates the Xcode project, and compiles the Debug application. `run` regenerates and incrementally builds the project, then opens the resulting application bundle. Click the laptop symbol in the macOS menu bar to open its panel. The application has no Dock icon.
+`check` lints Swift, runs the shared core tests, generates the Xcode project, and compiles the Debug application. `run` regenerates and incrementally builds the project, then opens the resulting application bundle. Click the laptop symbol in the macOS menu bar to open its panel. The application has no Dock icon.
 
 Before rebuilding an already-running copy, quit it from the panel. Launch Services may otherwise activate the existing process rather than restart the newly built executable.
 
@@ -49,7 +49,8 @@ Edit `project.yml` for durable target, scheme, signing, and build settings. Chan
 | `make -C apps/macos format`   | Rewrite Swift files using the native formatter       |
 | `make -C apps/macos lint`     | Check Swift formatting and lint rules; warnings fail |
 | `make -C apps/macos build`    | Generate the project and compile the Debug app       |
-| `make -C apps/macos check`    | Lint and compile without launching                   |
+| `make -C apps/macos test`     | Run the shared Swift core tests with fake hardware   |
+| `make -C apps/macos check`    | Lint, run core tests, and compile without launching  |
 | `make -C apps/macos run`      | Build and open the application                       |
 
 The existing root `pnpm check` continues to cover repository formatting and mobile checks. It does not compile Swift. Run both commands before submitting changes that affect this milestone.
@@ -68,5 +69,13 @@ The existing root `pnpm check` continues to cover repository formatting and mobi
 | `Sources/RemoteControlAgent/RemoteControlAgentApp.swift` | Composition root, menu-bar scene, and application termination               |
 | `Sources/RemoteControlAgent/AgentMenuView.swift`         | Panel layout, semantic colors, version display, and Quit button             |
 | `Sources/RemoteControlAgent/AgentStatusCard.swift`       | Honest setup-only connection status                                         |
+
+Additional audio boundaries:
+
+| Path                                                       | Responsibility                                                   |
+| ---------------------------------------------------------- | ---------------------------------------------------------------- |
+| `Sources/RemoteControlAgent/Audio/AudioControlCard.swift`  | Audio presentation, pending drafts, revisions, and errors        |
+| `Sources/RemoteControlAgent/Audio/CoreAudioHardware.swift` | Public CoreAudio reads, writes, and listener lifetime            |
+| `../../packages/remote-core/`                              | Audio values, command service, hardware port, and isolated tests |
 
 See [macOS Agent Shell](../../docs/macos-agent-shell.md) for architecture, validation, and scope, and [ADR 0002](../../docs/adr/0002-macos-project-generation.md) for the project-generation decision.
