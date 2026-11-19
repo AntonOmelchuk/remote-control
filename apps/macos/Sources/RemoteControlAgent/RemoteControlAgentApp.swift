@@ -1,13 +1,19 @@
 import AppKit
+import RemoteCore
 import SwiftUI
 
 @main
 @MainActor
 struct RemoteControlAgentApp: App {
+    @State private var audio = AudioOutputService(hardware: CoreAudioHardware())
+
     var body: some Scene {
         MenuBarExtra("Remote Control", systemImage: "laptopcomputer") {
-            AgentMenuView {
-                NSApplication.shared.terminate(nil)
+            AgentMenuView(audio: audio) {
+                Task {
+                    await audio.stopObserving()
+                    NSApplication.shared.terminate(nil)
+                }
             }
         }
         .menuBarExtraStyle(.window)

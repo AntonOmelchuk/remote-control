@@ -1,6 +1,6 @@
 # ADR 0002: Generate the macOS Xcode Project from a Specification
 
-- **Status:** Accepted; local native verification passed on 2026-11-18. CI execution pending.
+- **Status:** Accepted; local native verification passed on 2026-11-18. Baseline CI passed; audio workflow extension awaits verification.
 - **Date:** 2026-11-16
 
 ## Context
@@ -30,7 +30,7 @@ This is an explicit source-of-truth decision, not a claim of byte-identical outp
 
 ## Verification
 
-On November 18, 2026, the maintainer ran `make -C apps/macos check` successfully and reported `BUILD SUCCEEDED`. The command checks Swift lint, generates the Xcode project, and compiles the application. Manual checks confirmed menu-bar launch, Quit and relaunch, both appearance modes, and English/Ukrainian language selection. The first macOS CI execution remains pending; local validation does not establish hosted-runner success or wider deployment-target coverage.
+On November 18, 2026, the maintainer ran `make -C apps/macos check` successfully and reported `BUILD SUCCEEDED`. The command checks Swift lint, generates the Xcode project, and compiles the application. Manual checks confirmed menu-bar launch, Quit and relaunch, both appearance modes, and English/Ukrainian language selection. Both GitHub jobs subsequently passed for the shell baseline. The audio milestone extends the native check with shared core tests; that new path needs its own CI execution. Wider deployment-target coverage remains unverified.
 
 ## References
 

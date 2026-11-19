@@ -4,11 +4,13 @@ on:
   push:
     paths:
       - 'apps/macos/**'
+      - 'packages/remote-core/**'
       - '.github/workflows/macos.yml'
   pull_request:
     branches: [main]
     paths:
       - 'apps/macos/**'
+      - 'packages/remote-core/**'
       - '.github/workflows/macos.yml'
   workflow_dispatch:
 
@@ -41,5 +43,5 @@ jobs:
           xcrun swift --version
           xcodegen --version
 
-      - name: Check Swift and build application
+      - name: Check Swift, run core tests, and build application
         run: make -C apps/macos check

@@ -8,7 +8,7 @@ The existing workflow includes shared formatting, mobile ESLint and TypeScript c
 
 On November 16, 2026, the maintainer compiled, installed, and opened a development build on an iPhone XR running iOS 18.7.12. The current shell, preview, and preferences were reported working in that build. This is a manual device check. The existing CI job does not compile iOS. Run the quality checks again before committing changes.
 
-On November 18, 2026, the maintainer passed the macOS shell's native check and confirmed launch, Quit and relaunch, light/dark appearance, and both bundled languages. The separate macOS CI workflow awaits its first run. Live Mac control, discovery, pairing, and the browser extension remain planned.
+On November 18, 2026, the maintainer passed the macOS shell's native check and confirmed launch, Quit and relaunch, light/dark appearance, and both bundled languages. Both GitHub jobs passed for that shell baseline. On November 19, 2026, the audio milestone passed the expanded native check (including 15 Swift tests) and `pnpm check` (including 13 mobile tests). Primary volume/mute controls and external volume synchronization were verified on built-in speakers. Output switching and expanded native CI remain unverified; button flicker is tracked for a future update. Live Mac control, discovery, pairing, and the browser extension remain planned.
 
 ## Toolchain
 
@@ -71,7 +71,7 @@ make -C apps/macos check
 make -C apps/macos run
 ```
 
-`check` runs strict Swift lint, generates the Xcode project, and compiles the Debug app. `run` builds and opens it. XcodeGen 2.46.0 is installed locally; the specification requires at least that version. Native lint uses the formatter bundled with Xcode. Generated projects and build output are ignored.
+`check` runs strict Swift lint, shared Swift core tests, generates the Xcode project, and compiles the Debug app. `run` builds and opens it. XcodeGen 2.46.0 is installed locally; the specification requires at least that version. Native lint uses the formatter bundled with Xcode. Generated projects and build output are ignored.
 
 Run the native check alongside `pnpm check` for Mac source changes. The existing pnpm scripts remain focused on mobile and repository formatting. See [macOS Agent Shell](macos-agent-shell.md) for recorded local validation, remaining checks, and the separate macOS CI workflow.
 
@@ -183,3 +183,4 @@ Use English for documentation, code comments, developer-facing messages, tests, 
 - [lint-staged](https://github.com/lint-staged/lint-staged)
 - [iOS development build and troubleshooting](ios-development-build.md)
 - [macOS Agent shell and native checks](macos-agent-shell.md)
+- [Local audio control and validation](macos-audio-control.md)
