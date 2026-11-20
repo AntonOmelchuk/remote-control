@@ -4,11 +4,11 @@ This guide describes the current Remote Control workspace. Run commands from the
 
 ## Verified Baseline
 
-The existing workflow includes shared formatting, mobile ESLint and TypeScript checks, 13 platform-independent unit tests, Git hooks, GitHub Actions, and a protection ruleset for `main`.
+The existing workflow includes shared formatting, ESLint checks for mobile and the native facade, TypeScript checks, and 15 platform-independent unit tests, Git hooks, GitHub Actions, and a protection ruleset for `main`.
 
 On November 16, 2026, the maintainer compiled, installed, and opened a development build on an iPhone XR running iOS 18.7.12. The current shell, preview, and preferences were reported working in that build. This is a manual device check. The existing CI job does not compile iOS. Run the quality checks again before committing changes.
 
-On November 18, 2026, the maintainer passed the macOS shell's native check and confirmed launch, Quit and relaunch, light/dark appearance, and both bundled languages. Both GitHub jobs passed for that shell baseline. On November 19, 2026, the audio milestone passed the expanded native check (including 15 Swift tests) and `pnpm check` (including 13 mobile tests). Primary volume/mute controls and external volume synchronization were verified on built-in speakers. Output switching and expanded native CI remain unverified; button flicker is tracked for a future update. Live Mac control, discovery, pairing, and the browser extension remain planned.
+On November 18, 2026, the maintainer passed the macOS shell's native check and confirmed launch, Quit and relaunch, light/dark appearance, and both bundled languages. Both GitHub jobs passed for that shell baseline. On November 19, 2026, the audio milestone passed the expanded native check (including 15 Swift tests) and `pnpm check` (including 13 mobile tests). Primary volume/mute controls and external volume synchronization were verified on built-in speakers. Output switching and expanded native CI remain unverified; button flicker is tracked for a future update. On November 20, 2026, secure QR pairing, saved-access verification after restarting each app, revocation, and re-pairing passed on the maintainer's Mac and iPhone. The new iOS development build launched, and the Mac SignedDebug app passed signature/entitlement checks. Final `pnpm check` and `make -C apps/macos check` passed 15 mobile and 33 Swift tests. Feature CI remains pending. Live remote controls, discovery, and the browser extension remain planned. See [Secure Local Pairing](secure-pairing.md).
 
 ## Toolchain
 
@@ -68,10 +68,12 @@ The Mac shell uses its own XcodeGen specification and Makefile. From the reposit
 
 ```bash
 make -C apps/macos check
-make -C apps/macos run
+make -C apps/macos run DEVELOPMENT_TEAM=YOUR_TEAM_ID
 ```
 
 `check` runs strict Swift lint, shared Swift core tests, generates the Xcode project, and compiles the Debug app. `run` builds and opens it. XcodeGen 2.46.0 is installed locally; the specification requires at least that version. Native lint uses the formatter bundled with Xcode. Generated projects and build output are ignored.
+
+Local pairing requires the `SignedDebug` app and a developer-signed application identity. `make run` accepts the Xcode team ID as an argument or through an ignored `apps/macos/Signing.local.xcconfig`; see the Mac README. The default native check and CI use the ad-hoc `Debug` build and do not need Apple account credentials.
 
 Run the native check alongside `pnpm check` for Mac source changes. The existing pnpm scripts remain focused on mobile and repository formatting. See [macOS Agent Shell](macos-agent-shell.md) for recorded local validation, remaining checks, and the separate macOS CI workflow.
 

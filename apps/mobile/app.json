@@ -10,7 +10,10 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "supportsTablet": false,
-      "bundleIdentifier": "com.antonomelchuk.remotecontrol"
+      "bundleIdentifier": "com.antonomelchuk.remotecontrol",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Remote Control connects to your Mac on your local network."
+      }
     },
     "plugins": [
       "expo-router",
@@ -31,6 +34,14 @@
           "supportedLocales": ["en", "uk"],
           "supportsRTL": false
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Remote Control to scan the pairing code on your Mac.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "experiments": {
@@ -38,6 +49,10 @@
       "reactCompiler": true
     },
     "platforms": ["ios"],
-    "backgroundColor": "#F5F7F2"
+    "backgroundColor": "#F5F7F2",
+    "locales": {
+      "en": "./locales/en.json",
+      "uk": "./locales/uk.json"
+    }
   }
 }

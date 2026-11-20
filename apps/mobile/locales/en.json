@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Allow Remote Control to scan the pairing code on your Mac.",
+    "NSLocalNetworkUsageDescription": "Remote Control connects to your Mac on your local network."
+  }
+}

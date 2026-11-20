@@ -9,7 +9,7 @@
   "scripts": {
     "dev:mobile": "pnpm --dir apps/mobile run start",
     "prepare": "husky",
-    "lint": "pnpm --dir apps/mobile run lint",
+    "lint": "pnpm --dir apps/mobile run lint && pnpm --dir packages/remote-link run lint",
     "lint:fix": "pnpm --dir apps/mobile run lint:fix",
     "typecheck": "pnpm --dir apps/mobile run typecheck",
     "format": "prettier --write .",

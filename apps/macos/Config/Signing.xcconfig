@@ -1,0 +1,2 @@
+// Keep each developer's team selection outside the repository.
+#include? "../Signing.local.xcconfig"

@@ -65,6 +65,7 @@ export function HomeScreen() {
         <View style={styles.statusDot} />
       </View>
       <View style={styles.actions}>
+        <ActionButton label={t('pairing.scan')} onPress={() => router.push('/pair')} />
         <ActionButton
           label={t('home.explore')}
           icon="arrow.up.right"

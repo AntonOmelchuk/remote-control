@@ -4,6 +4,8 @@ The native Mac companion for Remote Control. The application provides a SwiftUI 
 
 **Validation status:** on November 18, 2026, the maintainer passed `make -C apps/macos check` (strict Swift lint, project generation, and a successful native build) and confirmed launch, Quit and relaunch, light/dark appearance, and both English and Ukrainian interface text. Both GitHub jobs subsequently passed for that shell baseline. On November 19, 2026, the expanded native check passed with all 15 shared tests and a successful audio application build. Manual checks confirmed volume control, mute/unmute preserving volume, external volume synchronization, and removal of the transient spinner and tick marks on MacBook Pro Speakers. Button flicker is deferred; output switching and the expanded native CI execution remain unverified; see [macOS Audio Control](../../docs/macos-audio-control.md). VoiceOver, keyboard focus, and a broader device/OS matrix remain unverified. The working iOS development build is a separate completed milestone.
 
+**Current pairing milestone:** the Agent now includes an expiring QR, explicit approval, saved-device records, and revocation. On November 20, 2026, Debug/SignedDebug builds, the Apple-issued signature and application/team identifier entitlements, QR pairing, saved-access verification after restarting each app, revocation, and re-pairing were verified locally. Final native checks passed all 33 Swift tests. Feature CI and broader network/device coverage remain pending. See [Secure Local Pairing](../../docs/secure-pairing.md). Local volume controls remain separate.
+
 ## Requirements
 
 - macOS 15 or later is the configured deployment target; this is not a tested-device support matrix.
@@ -11,7 +13,7 @@ The native Mac companion for Remote Control. The application provides a SwiftUI 
 - XcodeGen 2.46.0 or later; 2.46.0 is installed on the maintainer's Mac.
 - The formatter bundled with the selected Xcode toolchain (`xcrun swift-format`).
 
-The application references the local `packages/remote-core` Swift package. No external Swift package dependencies are introduced. The current local build uses ad hoc signing and does not require an Apple development team. Developer ID signing and notarized distribution are future work.
+The application references local `packages/remote-core` and `packages/remote-link` Swift packages. The pairing identity adds exact versions of Apple swift-certificates (1.9.0), swift-crypto (3.12.3), and swift-asn1 (1.3.1); the first native build resolves/downloads these dependencies. The `Debug` quality-check build uses ad hoc signing. Pairing runs from a separate `SignedDebug` build with an Apple Development identity and application-identifier entitlement. Configure your own Xcode team locally before running it. Developer ID signing and notarized distribution are future work.
 
 ## Build and Run
 
@@ -19,10 +21,17 @@ From the repository root:
 
 ```bash
 make -C apps/macos check
-make -C apps/macos run
+make -C apps/macos run DEVELOPMENT_TEAM=YOUR_TEAM_ID
 ```
 
-`check` lints Swift, runs the shared core tests, generates the Xcode project, and compiles the Debug application. `run` regenerates and incrementally builds the project, then opens the resulting application bundle. Click the laptop symbol in the macOS menu bar to open its panel. The application has no Dock icon.
+`check` lints Swift, runs the shared core and pairing tests, generates the Xcode project, and compiles the Debug application. `run` builds `SignedDebug`, allows Xcode automatic provisioning, verifies an Apple-issued signature and the built application/team identifier entitlements, then opens that signed bundle. It requires a team argument or a local signing configuration. Click the laptop symbol in the macOS menu bar to open its panel. The application has no Dock icon.
+
+To avoid supplying the team on every run, copy `Signing.local.xcconfig.example` to `Signing.local.xcconfig` and replace the placeholder with your team ID. The local file is ignored by Git. `Config/Signing.xcconfig` optionally includes it, including when the generated project is opened in Xcode. Once configured, `make -C apps/macos run` uses it. The Xcode scheme's Run action also selects `SignedDebug`.
+
+The two application paths are:
+
+- `build/DerivedData/Build/Products/Debug/RemoteControlAgent.app`: compilation/local-audio checks; it has no Data Protection Keychain access identity.
+- `build/DerivedData/Build/Products/SignedDebug/RemoteControlAgent.app`: signed pairing development app.
 
 Before rebuilding an already-running copy, quit it from the panel. Launch Services may otherwise activate the existing process rather than restart the newly built executable.
 
@@ -51,7 +60,7 @@ Edit `project.yml` for durable target, scheme, signing, and build settings. Chan
 | `make -C apps/macos build`    | Generate the project and compile the Debug app       |
 | `make -C apps/macos test`     | Run the shared Swift core tests with fake hardware   |
 | `make -C apps/macos check`    | Lint, run core tests, and compile without launching  |
-| `make -C apps/macos run`      | Build and open the application                       |
+| `make -C apps/macos run`      | Build, verify signing, and open SignedDebug          |
 
 The existing root `pnpm check` continues to cover repository formatting and mobile checks. It does not compile Swift. Run both commands before submitting changes that affect this milestone.
 

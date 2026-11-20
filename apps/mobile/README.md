@@ -1,56 +1,70 @@
-# Welcome to your Expo app 👋
+# Remote Control for iPhone
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The Expo/React Native client for controlling a Mac on the local network. Secure pairing and saved-access verification are implemented and locally verified. Live remote audio, playback, timers, and power commands are the next integration milestones. The remote preview continues to use local sample state.
 
-## Get started
+## Current Features
 
-1. Install dependencies
+- Home, connection guide, QR pairing, remote preview, and Settings routes through Expo Router.
+- Native QR camera scanner and a pinned TLS pairing client implemented in the `@remote-control/remote-link` workspace module.
+- Explicit approval on the Mac, native Keychain credentials, saved-access verification, and local credential removal.
+- Persistent system/English/Ukrainian language and system/light/dark appearance preferences.
+- Preview volume/mute, play/pause, seeking, and timer presets, isolated from Mac commands.
 
-   ```bash
-   npm install
-   ```
+On November 20, 2026, the maintainer launched the updated development build on the physical iPhone and verified pairing, saved-access verification after separately restarting the phone app and Mac Agent, revocation rejection, and successful re-pairing. `pnpm check` passed all 15 mobile tests alongside formatting, ESLint, and TypeScript. Feature CI and wider device/accessibility checks remain pending.
 
-2. Start the app
+## Development
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Run from the repository root with the Node/pnpm versions selected there:
 
 ```bash
-npm run reset-project
+pnpm install --frozen-lockfile
+pnpm --dir apps/mobile exec expo start --dev-client
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+A development build is required for the custom native pairing module. Expo Go and older development binaries keep preview access and show a rebuild explanation when pairing is unavailable. Metro serves the JavaScript bundle during development; standalone release distribution is separate work.
 
-### Other setup steps
+After native dependency or configuration changes, regenerate through Expo and build for the physical iPhone:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+pnpm --dir apps/mobile exec expo prebuild --platform ios
+pnpm --dir apps/mobile exec expo run:ios --device
+```
 
-## Learn more
+Use the Xcode account/team configured for your working development build. Generated `ios/` files, Pods, and signing artifacts remain ignored. Source-level permissions and locale text are configured in `app.json` and `locales/`; the camera configuration does not request microphone access. A simulator runtime is not required for the documented device workflow.
 
-To learn more about developing your project with Expo, look at the following resources:
+See [iOS Development Build](../../docs/ios-development-build.md) for signing, trust, Metro, and troubleshooting details.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Source Ownership
 
-## Join the community
+| Path                           | Responsibility                                                                                             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `src/app/`                     | Thin route entries and root navigation/providers                                                           |
+| `src/components/ui/`           | Shared text, buttons, symbols, and screen layout                                                           |
+| `src/design-system/`           | Theme palettes, tokens, and theme-aware styles                                                             |
+| `src/features/connection/`     | Home, Mac illustration, and connection guide                                                               |
+| `src/features/pairing/`        | Lazy-loaded scanner, comparison and saved-access UI, operation cancellation, and native-summary validation |
+| `src/features/remote-preview/` | Preview cards, timer picker, and isolated sample state                                                     |
+| `src/features/settings/`       | Language and appearance selection                                                                          |
+| `src/localization/`            | Typed English/Ukrainian resources and translation setup                                                    |
+| `src/preferences/`             | Versioned preference validation, restoration, and serialized writes                                        |
+| `locales/`                     | Native camera/local-network permission text                                                                |
+| `tests/`                       | Preferences, localization, contrast, and native-summary boundary tests                                     |
+| `../../packages/remote-link/`  | Shared Swift pairing protocol, native iOS client, Keychain/TLS boundary, and Expo facade                   |
 
-Join our community of developers creating universal apps.
+The shared native package is linked as a pnpm workspace dependency and discovered by Expo Autolinking. TLS identity checks and saved tokens stay native; JavaScript receives display summaries and operation results. The scanned QR text exists briefly in camera-event memory and is not persisted. Phone pairing currently saves one Mac credential.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Checks and Limits
+
+```bash
+pnpm check
+make -C apps/macos check
+```
+
+The first command checks repository formatting, mobile/native-facade ESLint, mobile TypeScript, and the 15 mobile unit tests. The second checks the Swift packages and Mac application on macOS. Neither command replaces the physical iOS build or manual network/camera checks.
+
+Saved access is not a continuous remote session. Listener state, paired-device labels, and the combined start/pair action need UI clarification in a future update. Current pairing, signing, security boundaries, verified scenarios, and remaining cases are documented in [Secure Local Pairing](../../docs/secure-pairing.md).
+
+- [Root project overview](../../README.md)
+- [Mobile shell](../../docs/mobile-shell.md)
+- [Preferences architecture](../../docs/app-preferences.md)
+- [Native pairing package](../../packages/remote-link/README.md)

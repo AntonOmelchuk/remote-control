@@ -7,6 +7,7 @@ struct AgentMenuView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     let audio: AudioOutputService
+    let pairing: PairingController
     let onQuit: () -> Void
 
     private var accent: Color {
@@ -29,9 +30,10 @@ struct AgentMenuView: View {
                         .font(.title2.weight(.semibold))
                         .fixedSize(horizontal: false, vertical: true)
 
+                    AgentPairingCard(controller: pairing)
+                        .tint(accent)
                     AudioControlCard(service: audio)
                         .tint(accent)
-                    AgentStatusCard()
                 }
                 .padding(20)
             }

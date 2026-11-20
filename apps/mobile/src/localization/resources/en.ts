@@ -92,4 +92,31 @@ export const en = {
   'settings.retry': 'Save current choices',
   'settings.footer':
     'Language and appearance stay on this iPhone. They do not change your iPhone settings.',
+  'pairing.navigation': 'Pair your Mac',
+  'pairing.eyebrow': 'A CONNECTION YOU APPROVE',
+  'pairing.title': 'Meet your Mac.',
+  'pairing.description':
+    'On your Mac, open Remote Control and choose Pair an iPhone. Scan the QR code here, compare the numbers, and approve the request on your Mac. Keep both devices on the same local network.',
+  'pairing.buildRequired':
+    'Rebuild and install the iOS development app to enable secure pairing. The preview remains available.',
+  'pairing.scanner': 'Scan the pairing QR code from your Mac',
+  'pairing.permission': 'Camera access is used only to scan your Mac’s pairing code.',
+  'pairing.permissionSettings': 'Allow camera access in iPhone Settings to scan the pairing code.',
+  'pairing.allowCamera': 'Allow camera',
+  'pairing.compare': 'The same numbers should appear on your Mac',
+  'pairing.confirmOnMac':
+    'If the numbers match, choose Allow pairing on your Mac. Otherwise reject the request.',
+  'pairing.waiting': 'Waiting for your Mac',
+  'pairing.success': 'Paired. Access is saved securely on this iPhone.',
+  'pairing.verified': 'Your Mac accepted the saved access.',
+  'pairing.error':
+    'Pairing could not be completed. Keep the Mac listener running, check local network permission and Wi-Fi, and create a fresh code if needed. You can verify saved access after a lost confirmation.',
+  'pairing.savedNote':
+    'Saved access is not an active remote session. Keep connections enabled on the Mac to verify it.',
+  'pairing.verify': 'Verify saved access',
+  'pairing.forget': 'Forget this Mac',
+  'pairing.cancel': 'Cancel',
+  'pairing.scan': 'Pair with your Mac',
+  'pairing.scope':
+    'This step saves and verifies access. Real remote controls will be connected next. The preview still uses sample data.',
 } as const;
