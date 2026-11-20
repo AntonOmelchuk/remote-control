@@ -13,9 +13,16 @@ type ActionButtonProps = {
   icon?: IconName;
   onPress: () => void;
   variant?: 'primary' | 'secondary';
+  disabled?: boolean;
 };
 
-export function ActionButton({ label, icon, onPress, variant = 'primary' }: ActionButtonProps) {
+export function ActionButton({
+  label,
+  icon,
+  onPress,
+  variant = 'primary',
+  disabled = false,
+}: ActionButtonProps) {
   const { accessibilityLanguage } = useAppTranslation();
   const { colors } = useTheme();
   const styles = useThemeStyles(createStyles);
@@ -26,10 +33,13 @@ export function ActionButton({ label, icon, onPress, variant = 'primary' }: Acti
       accessibilityLanguage={accessibilityLanguage}
       accessibilityRole="button"
       onPress={onPress}
+      disabled={disabled}
+      accessibilityState={{ disabled }}
       style={({ pressed }) => [
         styles.button,
         primary ? styles.primary : styles.secondary,
         pressed && styles.pressed,
+        disabled && styles.disabled,
       ]}
     >
       <AppText variant="label" style={[styles.label, { color: foreground }]}>
@@ -56,4 +66,5 @@ const createStyles = (colors: ThemeColors) =>
     secondary: { backgroundColor: colors.surfaceRaised, minHeight: layout.minimumTouchTarget },
     label: { flexShrink: 1, textAlign: 'center' },
     pressed: { opacity: 0.75 },
+    disabled: { opacity: 0.5 },
   });

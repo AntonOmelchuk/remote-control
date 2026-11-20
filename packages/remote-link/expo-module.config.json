@@ -1,0 +1,8 @@
+{
+  "platforms": ["ios"],
+  "apple": {
+    "modules": ["RemoteLinkModule"],
+    "podspecPath": "RemoteLink.podspec",
+    "swiftModuleName": "RemoteLink"
+  }
+}

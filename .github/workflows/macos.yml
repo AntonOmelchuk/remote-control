@@ -5,12 +5,14 @@ on:
     paths:
       - 'apps/macos/**'
       - 'packages/remote-core/**'
+      - 'packages/remote-link/**'
       - '.github/workflows/macos.yml'
   pull_request:
     branches: [main]
     paths:
       - 'apps/macos/**'
       - 'packages/remote-core/**'
+      - 'packages/remote-link/**'
       - '.github/workflows/macos.yml'
   workflow_dispatch:
 
