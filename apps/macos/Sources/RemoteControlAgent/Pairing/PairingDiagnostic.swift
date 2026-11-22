@@ -16,7 +16,7 @@ enum PairingDiagnostic {
             case .posix(let code): return "\(stage): POSIX \(code.rawValue)"
             case .dns(let code): return "\(stage): DNS \(code)"
             case .tls(let code): return "\(stage): TLS \(code)"
-            @unknown default: return "\(stage): unknown network status"
+            default: return "\(stage): unknown network status"
             }
         }
         if let failure = error as? PairingFailure { return "\(stage): \(failure.rawValue)" }
