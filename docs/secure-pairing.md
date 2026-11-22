@@ -164,7 +164,7 @@ The final checks ran after the Keychain/signing, XML entitlement-output, and lis
 
 ## Remaining Validation
 
-- Observe both CI jobs on this feature branch.
+- Completed after the recorded device checks: both pairing CI jobs passed before merge. Current remote-audio CI and its new device matrix remain pending.
 - Check permission prompts and text wrapping in both languages, light/dark appearance, keyboard use, and VoiceOver.
 - Manually reject a new pairing request, let an invitation expire, reuse an old code, and background/cancel during approval. Portable tests cover gate and input boundaries; the full UI/network paths remain separate checks.
 - Stop the listener and verify connection failure while local audio remains usable.
@@ -178,7 +178,7 @@ The final checks ran after the Keychain/signing, XML entitlement-output, and lis
 - Keep pairing, saved access, verification, and an eventual active remote session visually distinct. The maintainer encountered ambiguity in the Mac panel during the restart check.
 - The previously recorded Mute/Refresh button flicker remains deferred in [macOS Audio Control](macos-audio-control.md).
 
-These are tracked follow-ups; this documentation update does not change UI behavior.
+These follow-ups are addressed in the remote-audio source update and await device verification. The earlier device results above do not establish the behavior of that new UI.
 
 ## References
 

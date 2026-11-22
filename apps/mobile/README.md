@@ -1,10 +1,12 @@
 # Remote Control for iPhone
 
-The Expo/React Native client for controlling a Mac on the local network. Secure pairing and saved-access verification are implemented and locally verified. Live remote audio, playback, timers, and power commands are the next integration milestones. The remote preview continues to use local sample state.
+**Remote audio status:** the primary physical-device workflow passed on November 22, 2026: phone volume/mute, Mac-to-phone synchronization, use with the panel closed, the UI follow-up smoke check, Stop/Start recovery after reopening the route, active-session revocation with rejected reconnect, and re-pairing. The native Mac check passed 45 Swift tests and the app build; the updated iOS app compiled and launched. Implementation-workspace mobile checks pass 23 tests. Final mobile checks after the UI follow-up, current feature CI, and broader failure/device coverage remain pending. See [Authenticated Remote Audio](../../docs/remote-audio-control.md) for ownership, setup, protocol, and the recorded matrix.
+
+The Expo/React Native client for controlling a Mac on the local network. Secure pairing and saved-access verification are implemented and locally verified. Live remote audio has passed the primary-device workflow; playback, timers, and power commands remain planned. The remote preview continues to use local sample state.
 
 ## Current Features
 
-- Home, connection guide, QR pairing, remote preview, and Settings routes through Expo Router.
+- Home, connection guide, QR pairing, Mac audio, remote preview, and Settings routes through Expo Router.
 - Native QR camera scanner and a pinned TLS pairing client implemented in the `@remote-control/remote-link` workspace module.
 - Explicit approval on the Mac, native Keychain credentials, saved-access verification, and local credential removal.
 - Persistent system/English/Ukrainian language and system/light/dark appearance preferences.
@@ -48,7 +50,7 @@ See [iOS Development Build](../../docs/ios-development-build.md) for signing, tr
 | `src/localization/`            | Typed English/Ukrainian resources and translation setup                                                    |
 | `src/preferences/`             | Versioned preference validation, restoration, and serialized writes                                        |
 | `locales/`                     | Native camera/local-network permission text                                                                |
-| `tests/`                       | Preferences, localization, contrast, and native-summary boundary tests                                     |
+| `tests/`                       | Preferences, localization, contrast, native-summary, and audio fixture tests                               |
 | `../../packages/remote-link/`  | Shared Swift pairing protocol, native iOS client, Keychain/TLS boundary, and Expo facade                   |
 
 The shared native package is linked as a pnpm workspace dependency and discovered by Expo Autolinking. TLS identity checks and saved tokens stay native; JavaScript receives display summaries and operation results. The scanned QR text exists briefly in camera-event memory and is not persisted. Phone pairing currently saves one Mac credential.
@@ -60,9 +62,9 @@ pnpm check
 make -C apps/macos check
 ```
 
-The first command checks repository formatting, mobile/native-facade ESLint, mobile TypeScript, and the 15 mobile unit tests. The second checks the Swift packages and Mac application on macOS. Neither command replaces the physical iOS build or manual network/camera checks.
+The first command checks repository formatting, mobile/native-facade ESLint, mobile TypeScript, and the 23 mobile unit tests. The second checks the Swift packages and Mac application on macOS. Neither command replaces the physical iOS build or manual network/camera checks.
 
-Saved access is not a continuous remote session. Listener state, paired-device labels, and the combined start/pair action need UI clarification in a future update. Current pairing, signing, security boundaries, verified scenarios, and remaining cases are documented in [Secure Local Pairing](../../docs/secure-pairing.md).
+Saved access is not a continuous remote session. The remote-audio update separates listener start, QR creation, saved-device labels, and active-session labels; its primary-device behavior has been checked; broader UI/accessibility coverage remains pending. Current pairing, signing, security boundaries, verified scenarios, and remaining cases are documented in [Secure Local Pairing](../../docs/secure-pairing.md).
 
 - [Root project overview](../../README.md)
 - [Mobile shell](../../docs/mobile-shell.md)

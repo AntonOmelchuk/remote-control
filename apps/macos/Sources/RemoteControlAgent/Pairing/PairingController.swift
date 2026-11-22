@@ -2,6 +2,7 @@ import Darwin
 import Foundation
 import Network
 import Observation
+import RemoteCore
 import RemotePairing
 import Security
 
@@ -29,9 +30,12 @@ final class PairingController {
     private(set) var starting = false
     private(set) var addresses: [String] = []
     var selectedAddress = ""
+    private(set) var activeDeviceIDs: Set<UUID> = []
 
     @ObservationIgnored private let vault = PairingKeychain(
         service: "com.antonomelchuk.remotecontrol.agent.pairing.v1")
+    @ObservationIgnored private let audio: RemoteAudioBroker
+    @ObservationIgnored private var pairWhenReady = false
     @ObservationIgnored private var identity: AgentIdentity?
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var listeningHost: String?
@@ -41,10 +45,23 @@ final class PairingController {
 
     private struct Peer {
         let connection: NWConnection
-        let timeout: Task<Void, Never>
+        var timeout: Task<Void, Never>
         var requestID: UUID?
         var grant: PairedPhone?
         var closing = false
+        var deviceID: UUID?
+        var audioReady = false
+        var audioGate: RemoteAudioGate?
+        var action: Task<Void, Never>?
+        var sendingAudio = false
+        var audioOutbox: [RemoteAudioFrame] = []
+        var latestAudio: RemoteAudioSnapshot?
+
+    }
+
+    init(audio: AudioOutputService) {
+        self.audio = RemoteAudioBroker(service: audio)
+        self.audio.onChange = { [weak self] snapshot in self?.broadcast(snapshot) }
     }
 
     func prepare() {
@@ -69,6 +86,12 @@ final class PairingController {
     }
 
     func begin() {
+        if running { issueInvitation() } else { start(createInvitation: true) }
+    }
+
+    func startConnections() { start(createInvitation: false) }
+
+    private func start(createInvitation: Bool) {
         guard !starting else { return }
         failure = nil
         diagnostic = nil
@@ -79,17 +102,18 @@ final class PairingController {
             diagnostic = "network.address: no usable private IPv4 address"
             return
         }
-        guard devices.count < 10 else {
+        guard !createInvitation || devices.count < 10 else {
             failure = .busy
             diagnostic = "devices.capacity: ten paired devices already stored"
             return
         }
         if running, selectedAddress == listeningHost {
-            issueInvitation()
+            if createInvitation { issueInvitation() }
             return
         }
         if running { stop() }
         starting = true
+        pairWhenReady = createInvitation
         var stage = "identity.load-or-create"
         do {
             let loaded = try AgentIdentity.loadOrCreate()
@@ -121,7 +145,8 @@ final class PairingController {
                         self.running = true
                         self.failure = nil
                         self.diagnostic = nil
-                        self.issueInvitation()
+                        self.audio.start()
+                        if self.pairWhenReady { self.issueInvitation() }
                     case .waiting(let error):
                         self.failure = .connection
                         self.diagnostic = PairingDiagnostic.describe(
@@ -135,8 +160,14 @@ final class PairingController {
                     }
                 }
             }
-            newListener.newConnectionHandler = { [weak self] connection in
-                Task { @MainActor in self?.accept(connection) }
+            newListener.newConnectionHandler = { [weak self, weak newListener] connection in
+                Task { @MainActor in
+                    guard let self, self.listener === newListener else {
+                        connection.cancel()
+                        return
+                    }
+                    self.accept(connection)
+                }
             }
             newListener.start(queue: .main)
         } catch {
@@ -153,6 +184,7 @@ final class PairingController {
         listener = nil
         listeningHost = nil
         for id in Array(peers.keys) { close(id) }
+        audio.stop()
         gate.cancel()
         invitation = nil
         approval = nil
@@ -204,6 +236,7 @@ final class PairingController {
             let next = devices.filter { $0.id != id }
             try vault.save(JSONEncoder().encode(next), account: "devices")
             devices = next
+            for peerID in Array(peers.keys) where peers[peerID]?.deviceID == id { close(peerID) }
             failure = nil
             diagnostic = nil
         } catch {
@@ -213,7 +246,9 @@ final class PairingController {
     }
 
     private func issueInvitation() {
-        guard let port = listener?.port?.rawValue, let identity else { return }
+        guard devices.count < 10, let port = listener?.port?.rawValue, let identity,
+            let listeningHost
+        else { return }
         if let approval { close(approval.connectionID) }
         approval = nil
         gate.cancel()
@@ -221,7 +256,7 @@ final class PairingController {
         expiry?.cancel()
         do {
             let ticket = PairingInvitation(
-                id: UUID(), host: selectedAddress, port: port,
+                id: UUID(), host: listeningHost, port: port,
                 name: macName(), fingerprint: identity.fingerprint,
                 secret: PairingEncoding.base64URL(try PairingCrypto.randomSecret()),
                 expiresAt: Int64(Date().addingTimeInterval(120).timeIntervalSince1970 * 1000))
@@ -281,7 +316,13 @@ final class PairingController {
                     self.close(id)
                     return
                 }
-                do { try self.handle(PairingFrame.decode(data), from: id) } catch { self.close(id) }
+                do {
+                    if self.peers[id]?.audioGate != nil {
+                        try self.handleAudio(RemoteAudioFrame.decode(data), from: id)
+                    } else {
+                        try self.handle(PairingFrame.decode(data), from: id)
+                    }
+                } catch { self.close(id) }
                 if let peer = self.peers[id], !peer.closing { self.receive(id) }
             }
         }
@@ -330,7 +371,7 @@ final class PairingController {
             } catch {
                 reject(id, request: message.requestID, reason: .storage)
             }
-        case .authenticate:
+        case .authenticate, .openAudio:
             guard peer.requestID == nil, let deviceID = message.deviceID, let token = message.token,
                 let bytes = try? PairingEncoding.decodeBase64URL(token), bytes.count == 32,
                 let device = devices.first(where: { $0.id == deviceID }),
@@ -342,11 +383,118 @@ final class PairingController {
             }
             peer.requestID = message.requestID
             peers[id] = peer
-            send(
-                PairingFrame(.authenticated, requestID: message.requestID), to: id, closeAfter: true
-            )
+            if message.type == .authenticate {
+                send(
+                    PairingFrame(.authenticated, requestID: message.requestID), to: id,
+                    closeAfter: true)
+            } else {
+                let sessionID = UUID()
+                peers[id]?.deviceID = deviceID
+                peers[id]?.audioGate = RemoteAudioGate(sessionID: sessionID, now: .now)
+                resetAudioTimeout(id)
+                peers[id]?.action = Task { [weak self] in
+                    guard let self else { return }
+                    let snapshot = await self.audio.refresh()
+                    guard self.peers[id]?.deviceID == deviceID, !Task.isCancelled else { return }
+                    self.peers[id]?.action = nil
+                    self.peers[id]?.audioReady = true
+                    self.activeDeviceIDs = Set(
+                        self.peers.values.filter(\.audioReady).compactMap(\.deviceID))
+                    var frame = RemoteAudioFrame(
+                        .audioWelcome, requestID: message.requestID, sessionID: sessionID)
+                    frame.snapshot = snapshot
+                    self.sendAudio(frame, to: id)
+                }
+            }
         default: throw PairingFailure.protocolError
         }
+    }
+
+    private func handleAudio(_ frame: RemoteAudioFrame, from id: UUID) throws {
+        guard var peer = peers[id], let deviceID = peer.deviceID,
+            devices.contains(where: { $0.id == deviceID }), peer.action == nil,
+            var gate = peer.audioGate
+        else { throw PairingFailure.rejected }
+        try gate.accept(frame, now: .now)
+        peer.audioGate = gate
+        peers[id] = peer
+        resetAudioTimeout(id)
+        let sessionID = gate.sessionID
+        peers[id]?.action = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let (snapshot, failure) = try await self.audio.execute(frame)
+                guard self.peers[id]?.deviceID == deviceID, !Task.isCancelled else { return }
+                self.peers[id]?.action = nil
+                var result = RemoteAudioFrame(
+                    .audioResult, requestID: frame.requestID, sessionID: sessionID)
+                result.sequence = frame.sequence
+                result.snapshot = snapshot
+                result.failure = failure
+                self.sendAudio(result, to: id)
+            } catch { self.close(id) }
+        }
+    }
+
+    private func resetAudioTimeout(_ id: UUID) {
+        peers[id]?.timeout.cancel()
+        peers[id]?.timeout = Task { [weak self] in
+            do { try await Task.sleep(for: .seconds(35)) } catch { return }
+            self?.close(id)
+        }
+    }
+
+    private func broadcast(_ snapshot: RemoteAudioSnapshot) {
+        for id in Array(peers.keys) where peers[id]?.audioReady == true {
+            peers[id]?.latestAudio = snapshot
+            drainAudio(id)
+        }
+    }
+
+    private func sendAudio(_ frame: RemoteAudioFrame, to id: UUID) {
+        guard let peer = peers[id], peer.audioOutbox.count < 2 else {
+            close(id)
+            return
+        }
+        peers[id]?.audioOutbox.append(frame)
+        drainAudio(id)
+    }
+
+    private func drainAudio(_ id: UUID) {
+        guard var peer = peers[id], !peer.sendingAudio, let gate = peer.audioGate else { return }
+        let frame: RemoteAudioFrame
+        if !peer.audioOutbox.isEmpty {
+            frame = peer.audioOutbox.removeFirst()
+        } else if let snapshot = peer.latestAudio {
+            var update = RemoteAudioFrame(
+                .audioUpdate, requestID: UUID(), sessionID: gate.sessionID)
+            update.snapshot = snapshot
+            frame = update
+            peer.latestAudio = nil
+        } else {
+            return
+        }
+        guard let data = try? frame.encoded() else {
+            close(id)
+            return
+        }
+        peer.sendingAudio = true
+        peers[id] = peer
+        let context = NWConnection.ContentContext(
+            identifier: "remote-audio", metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
+        peer.connection.send(
+            content: data, contentContext: context, isComplete: true,
+            completion: .contentProcessed { [weak self] error in
+                Task { @MainActor in
+                    guard let self, self.peers[id] != nil else { return }
+                    if error != nil {
+                        self.close(id)
+                        return
+                    }
+                    self.peers[id]?.sendingAudio = false
+                    self.drainAudio(id)
+                }
+            })
     }
 
     private func send(_ frame: PairingFrame, to id: UUID, closeAfter: Bool = false) {
@@ -375,7 +523,9 @@ final class PairingController {
 
     private func close(_ id: UUID) {
         guard let peer = peers.removeValue(forKey: id) else { return }
+        activeDeviceIDs = Set(peers.values.filter(\.audioReady).compactMap(\.deviceID))
         peer.timeout.cancel()
+        peer.action?.cancel()
         peer.connection.stateUpdateHandler = nil
         peer.connection.cancel()
         if approval?.connectionID == id {

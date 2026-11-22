@@ -7,7 +7,9 @@ var package = Package(
     products: [.library(name: "RemotePairing", targets: ["RemotePairing"])],
     targets: [
         .target(name: "RemotePairing"),
-        .testTarget(name: "RemotePairingTests", dependencies: ["RemotePairing"]),
+        .testTarget(
+            name: "RemotePairingTests", dependencies: ["RemotePairing"],
+            resources: [.copy("Fixtures")]),
     ],
     swiftLanguageModes: [.v6]
 )

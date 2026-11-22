@@ -65,6 +65,7 @@ export function HomeScreen() {
         <View style={styles.statusDot} />
       </View>
       <View style={styles.actions}>
+        <ActionButton label={t('remoteAudio.open')} onPress={() => router.push('/remote')} />
         <ActionButton label={t('pairing.scan')} onPress={() => router.push('/pair')} />
         <ActionButton
           label={t('home.explore')}

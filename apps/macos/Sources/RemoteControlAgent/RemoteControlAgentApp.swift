@@ -5,8 +5,14 @@ import SwiftUI
 @main
 @MainActor
 struct RemoteControlAgentApp: App {
-    @State private var pairing = PairingController()
-    @State private var audio = AudioOutputService(hardware: CoreAudioHardware())
+    @State private var pairing: PairingController
+    @State private var audio: AudioOutputService
+
+    init() {
+        let service = AudioOutputService(hardware: CoreAudioHardware())
+        _audio = State(initialValue: service)
+        _pairing = State(initialValue: PairingController(audio: service))
+    }
 
     var body: some Scene {
         MenuBarExtra("Remote Control", systemImage: "laptopcomputer") {
