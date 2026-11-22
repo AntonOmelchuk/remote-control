@@ -2,7 +2,7 @@
 
 ## Scope
 
-This milestone adds local audio controls to the Mac menu-bar Agent: a current output name, volume slider, five-percentage-point adjustments, mute/unmute, refresh, capability states, and error feedback. The mobile preview continues to use local sample data. Phone pairing and remote commands remain planned.
+This milestone adds local audio controls to the Mac menu-bar Agent: a current output name, volume slider, five-percentage-point adjustments, mute/unmute, refresh, capability states, and error feedback. The mobile preview continues to use local sample data. The original milestone did not include phone commands. Pairing has since been verified and merged; the [remote-audio update](remote-audio-control.md) adds a transport integration awaiting native/device validation.
 
 On November 19, 2026, a read-only CoreAudio probe on the maintainer's Mac reported `MacBook Pro Speakers`, with writable main volume and mute properties. That verifies property availability on this output. The complete native check subsequently passed, including all 15 Swift tests and the application build. The maintainer confirmed the output display, audible volume changes using the slider and adjustment buttons, mute/unmute preserving volume, and external volume synchronization. After the UI polish build, the spinner and slider tick marks were confirmed removed. Device switching and this feature's CI execution remain unverified.
 
@@ -12,13 +12,13 @@ The previous shell milestone passed local build/lifecycle/theme/language checks 
 
 ## Architecture and Ownership
 
-| Boundary              | Implementation                  | Responsibility                                                                     |
-| --------------------- | ------------------------------- | ---------------------------------------------------------------------------------- |
-| SwiftUI presentation  | `AudioControlCard`              | Render observed state, draft volume, pending writes, capability limits, and errors |
-| Application service   | `RemoteCore.AudioOutputService` | Serialize access, validate commands, publish revisions, and own a subscription     |
-| Hardware port         | `RemoteCore.AudioHardwarePort`  | Define the testable boundary for hardware operations and notifications             |
-| Native adapter        | `CoreAudioHardware`             | Access the default output through public CoreAudio APIs                            |
-| Registration lifetime | `AudioPropertyRegistration`     | Pair listener registration with removal using the same block and queue             |
+| Boundary              | Implementation                  | Responsibility                                                                            |
+| --------------------- | ------------------------------- | ----------------------------------------------------------------------------------------- |
+| SwiftUI presentation  | `AudioControlCard`              | Render observed state, draft volume, pending writes, capability limits, and errors        |
+| Application service   | `RemoteCore.AudioOutputService` | Serialize access, validate commands, publish revisions, and own independent subscriptions |
+| Hardware port         | `RemoteCore.AudioHardwarePort`  | Define the testable boundary for hardware operations and notifications                    |
+| Native adapter        | `CoreAudioHardware`             | Access the default output through public CoreAudio APIs                                   |
+| Registration lifetime | `AudioPropertyRegistration`     | Pair listener registration with removal using the same block and queue                    |
 
 The composition root creates the service and native adapter. The view receives the service as a dependency. `RemoteCore` contains no Apple audio API calls; its tests use a synchronized fake hardware implementation. All hardware reads and writes execute on the service actor rather than the main UI actor.
 
@@ -118,3 +118,7 @@ Record exact outcomes after each observed check. A passing fake-hardware test do
 - [Apple mute property](https://developer.apple.com/documentation/coreaudio/kaudiodevicepropertymute)
 - [Apple property listener registration](<https://developer.apple.com/documentation/coreaudio/audioobjectaddpropertylistenerblock(_:_:_:_:)>)
 - [Apple property listener removal](<https://developer.apple.com/documentation/coreaudio/audioobjectremovepropertylistenerblock(_:_:_:_:)>)
+
+## Remote Audio Follow-up
+
+The remote-audio source update adds independent subscribers to the service and removes per-write disabled appearance from the local Mute/Refresh buttons while preserving handler guards. Their appearance and simultaneous panel/phone behavior must still be checked on devices. Earlier button flicker is historical until that verification is recorded.

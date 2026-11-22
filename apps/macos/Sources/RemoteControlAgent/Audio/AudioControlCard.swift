@@ -47,11 +47,11 @@ struct AudioControlCard: View {
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer(minLength: 4)
                 Button("Refresh") {
+                    guard !writing, draftVolume == nil else { return }
                     commandFailure = nil
                     reloadID += 1
                 }
                 .controlSize(.small)
-                .disabled(writing || draftVolume != nil)
             }
         }
         .padding(16)
@@ -138,7 +138,7 @@ struct AudioControlCard: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            .disabled(writing || draftVolume != nil || !output.mute.canWrite)
+            .disabled(!output.mute.canWrite)
         } else {
             Text("Mute control is unavailable for this output.")
                 .font(.caption).foregroundStyle(.secondary)

@@ -1,0 +1,43 @@
+{
+  "welcome": {
+    "version": 1,
+    "type": "audioWelcome",
+    "requestID": "10CBEA5A-8C8F-422F-8933-A13DA7C44198",
+    "sessionID": "DC3CED00-C09C-4DC5-B4FB-79B588C34E05",
+    "sequence": 0,
+    "snapshot": {
+      "revision": 42,
+      "output": {
+        "id": "3E69701C-3BFE-46CF-A095-E54F2E8FAD54",
+        "name": "Contract test speakers",
+        "volume": 0.42,
+        "canSetVolume": true,
+        "muted": false,
+        "canSetMute": false
+      }
+    }
+  },
+  "command": {
+    "version": 1,
+    "type": "setVolume",
+    "requestID": "3582A8EC-BCBB-49B9-81D9-1CBD58AF240F",
+    "sessionID": "DC3CED00-C09C-4DC5-B4FB-79B588C34E05",
+    "sequence": 1,
+    "outputID": "3E69701C-3BFE-46CF-A095-E54F2E8FAD54",
+    "volume": 0.5
+  },
+  "status": {
+    "owner": "contract-test-owner",
+    "snapshot": {
+      "revision": 42,
+      "output": {
+        "id": "3E69701C-3BFE-46CF-A095-E54F2E8FAD54",
+        "name": "Contract test speakers",
+        "volume": 0.42,
+        "canSetVolume": true,
+        "muted": false,
+        "canSetMute": false
+      }
+    }
+  }
+}

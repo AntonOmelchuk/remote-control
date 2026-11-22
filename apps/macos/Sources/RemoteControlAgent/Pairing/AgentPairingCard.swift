@@ -11,6 +11,12 @@ struct AgentPairingCard: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Phone connection").font(.headline)
             Text("Pair only with an iPhone you trust.").font(.caption).foregroundStyle(.secondary)
+            Text(
+                controller.running
+                    ? LocalizedStringKey("Connections enabled")
+                    : LocalizedStringKey("Connections stopped")
+            )
+            .font(.caption).foregroundStyle(.secondary)
 
             if let approval = controller.approval {
                 Text(verbatim: approval.request.name ?? "iPhone").font(
@@ -41,16 +47,19 @@ struct AgentPairingCard: View {
                             Text(verbatim: address).tag(address)
                         }
                     }
+                    .disabled(controller.running || controller.starting)
                 }
-                Button(
-                    controller.starting
-                        ? LocalizedStringKey("Starting connection…")
-                        : LocalizedStringKey("Pair an iPhone")
-                ) {
-                    controller.begin()
+                if controller.running {
+                    Button("Pair an iPhone") { controller.begin() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(controller.devices.count >= 10)
                 }
-                .buttonStyle(.borderedProminent).disabled(controller.starting)
             }
+            if !controller.running && !controller.starting {
+                Button("Start connections") { controller.startConnections() }
+                    .buttonStyle(.borderedProminent)
+            }
+            if controller.starting { Text("Starting connection…").font(.caption) }
             if controller.running || controller.starting {
                 Button("Stop connections") { controller.stop() }.controlSize(.small)
             }
@@ -67,14 +76,25 @@ struct AgentPairingCard: View {
                     }
                 #endif
             }
+            if !controller.devices.isEmpty {
+                Text("Paired devices").font(.subheadline.weight(.semibold))
+            }
             ForEach(controller.devices) { device in
                 HStack {
-                    Text(verbatim: device.name).font(.subheadline).lineLimit(2)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: device.name).font(.subheadline).lineLimit(2)
+                        Text(
+                            controller.activeDeviceIDs.contains(device.id)
+                                ? LocalizedStringKey("Remote session active")
+                                : LocalizedStringKey("Saved access")
+                        )
+                        .font(.caption).foregroundStyle(.secondary)
+                    }
                     Spacer()
                     Button("Revoke") { controller.revoke(device.id) }.controlSize(.small)
                 }
             }
-            Text("Pairing saves access. Remote controls are the next step.")
+            Text("Volume and mute are available to paired phones while connections are enabled.")
                 .font(.caption).foregroundStyle(.secondary)
         }
         .padding(16)

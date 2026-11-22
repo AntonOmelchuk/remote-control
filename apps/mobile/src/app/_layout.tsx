@@ -63,6 +63,7 @@ function AppNavigator() {
             }}
           />
           <Stack.Screen name="connection-guide" options={{ title: t('navigation.guide') }} />
+          <Stack.Screen name="remote" options={{ title: t('remoteAudio.navigation') }} />
           <Stack.Screen name="pair" options={{ title: t('pairing.navigation') }} />
           <Stack.Screen name="settings" options={{ title: t('navigation.settings') }} />
         </Stack>

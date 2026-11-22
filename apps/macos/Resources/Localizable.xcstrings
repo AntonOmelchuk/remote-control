@@ -663,6 +663,118 @@
           }
         }
       }
+    },
+    "Connections enabled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connections enabled"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підключення увімкнено"
+          }
+        }
+      }
+    },
+    "Connections stopped": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connections stopped"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підключення вимкнено"
+          }
+        }
+      }
+    },
+    "Start connections": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start connections"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увімкнути підключення"
+          }
+        }
+      }
+    },
+    "Paired devices": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paired devices"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пристрої зі збереженим доступом"
+          }
+        }
+      }
+    },
+    "Remote session active": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote session active"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активний сеанс керування"
+          }
+        }
+      }
+    },
+    "Saved access": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved access"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережений доступ"
+          }
+        }
+      }
+    },
+    "Volume and mute are available to paired phones while connections are enabled.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volume and mute are available to paired phones while connections are enabled."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гучність і mute доступні підключеним телефонам, поки підключення увімкнено."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

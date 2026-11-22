@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { lazy, Suspense } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -66,6 +67,11 @@ export function PairingScreen() {
               <AppText variant="caption" tone="secondary">
                 {t('pairing.savedNote')}
               </AppText>
+              <ActionButton
+                label={t('remoteAudio.open')}
+                disabled={pending}
+                onPress={() => router.push('/remote')}
+              />
               <ActionButton
                 label={t('pairing.verify')}
                 disabled={pending}

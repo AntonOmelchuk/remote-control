@@ -5,51 +5,6 @@ import Security
     import RemotePairing
 #endif
 
-private final class PinnedTLSDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate,
-    Sendable
-{
-    private let fingerprint: String
-    init(fingerprint: String) { self.fingerprint = fingerprint }
-
-    func urlSession(
-        _ session: URLSession,
-        didReceive challenge: URLAuthenticationChallenge,
-        completionHandler:
-            @escaping @Sendable (
-                URLSession.AuthChallengeDisposition, URLCredential?
-            ) -> Void
-    ) {
-        guard
-            challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
-            let trust = challenge.protectionSpace.serverTrust,
-            let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate],
-            let leaf = chain.first,
-            PairingCrypto.fingerprint(SecCertificateCopyData(leaf) as Data) == fingerprint
-        else {
-            completionHandler(.cancelAuthenticationChallenge, nil)
-            return
-        }
-        // The scanned leaf is the trust anchor; this does not trust arbitrary self-signed peers.
-        guard SecTrustSetPolicies(trust, SecPolicyCreateBasicX509()) == errSecSuccess,
-            SecTrustSetAnchorCertificates(trust, [leaf] as CFArray) == errSecSuccess,
-            SecTrustSetAnchorCertificatesOnly(trust, true) == errSecSuccess,
-            SecTrustEvaluateWithError(trust, nil)
-        else {
-            completionHandler(.cancelAuthenticationChallenge, nil)
-            return
-        }
-        completionHandler(.useCredential, URLCredential(trust: trust))
-    }
-
-    func urlSession(
-        _ session: URLSession, task: URLSessionTask,
-        willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
-        completionHandler: @escaping @Sendable (URLRequest?) -> Void
-    ) {
-        completionHandler(nil)
-    }
-}
-
 actor PairingClient {
     private let vault = PairingKeychain(
         service: "com.antonomelchuk.remotecontrol.mobile.pairing.v1")
@@ -162,23 +117,10 @@ actor PairingClient {
     private func open(host: String, port: UInt16, fingerprint: String) throws
         -> URLSessionWebSocketTask
     {
-        guard let url = URL(string: "wss://\(host):\(port)/pairing/v1") else {
-            throw PairingFailure.invalidCode
-        }
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.tlsMinimumSupportedProtocolVersion = .TLSv13
-        configuration.timeoutIntervalForRequest = 60
-        configuration.timeoutIntervalForResource = 65
-        configuration.urlCache = nil
-        configuration.httpCookieStorage = nil
-        let session = URLSession(
-            configuration: configuration,
-            delegate: PinnedTLSDelegate(fingerprint: fingerprint), delegateQueue: nil)
+        let (session, socket) = try PinnedTransport.open(
+            host: host, port: port, fingerprint: fingerprint, resourceTimeout: 65)
         self.session = session
-        let socket = session.webSocketTask(with: url)
-        socket.maximumMessageSize = PairingEncoding.maximumBytes
         self.socket = socket
-        socket.resume()
         return socket
     }
 

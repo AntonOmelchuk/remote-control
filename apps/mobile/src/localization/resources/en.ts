@@ -16,24 +16,24 @@ export const en = {
   'home.eyebrow': 'LESS REACHING. MORE RELAXING.',
   'home.title': 'Your Mac.\nWithin reach.',
   'home.description': 'Settle in. Your favorite controls belong right here, in your hand.',
-  'home.deviceTitle': 'No Mac connected',
-  'home.deviceDescription': 'Your remote starts with a connection.',
+  'home.deviceTitle': 'Your Mac, one connection away',
+  'home.deviceDescription': 'Pair once, then open Mac audio.',
   'home.explore': 'Explore the remote',
   'home.footnote': 'Try the interactive preview. No Mac required.',
   'guide.eyebrow': 'MADE FOR YOUR OWN SPACE',
   'guide.title': 'A simple connection.\nA little peace of mind.',
-  'guide.description': 'Here is how connecting your devices is planned to work.',
+  'guide.description': 'Connect your devices locally and approve access on your Mac.',
   'guide.companionTitle': 'A companion on your Mac',
   'guide.companionDescription':
-    'The planned Mac companion will handle your controls and keep your devices in sync.',
+    'The Mac companion handles system audio and publishes confirmed output state.',
   'guide.networkTitle': 'One local network',
   'guide.networkDescription':
-    'Your iPhone and Mac will communicate over your local network, without a cloud account.',
+    'Your iPhone and Mac communicate over your local network, without a cloud account.',
   'guide.pairingTitle': 'Pair with a QR code',
   'guide.pairingDescription':
-    'Scan a pairing code, then confirm access on your Mac. Being on the same Wi-Fi will never grant access by itself.',
+    'Start connections on the Mac, create a pairing code, scan it, and confirm the matching numbers on the Mac.',
   'guide.notice':
-    'Mac pairing is not available in this preview. You can explore the controls without connecting a device.',
+    'Mac audio requires the updated development build. The preview works without a connection.',
   'guide.tryPreview': 'Try the preview',
   'preview.deviceLabel': 'DEMO DEVICE',
   'preview.deviceName': 'Sample MacBook',
@@ -96,7 +96,7 @@ export const en = {
   'pairing.eyebrow': 'A CONNECTION YOU APPROVE',
   'pairing.title': 'Meet your Mac.',
   'pairing.description':
-    'On your Mac, open Remote Control and choose Pair an iPhone. Scan the QR code here, compare the numbers, and approve the request on your Mac. Keep both devices on the same local network.',
+    'On your Mac, open Remote Control, start connections, and choose Pair an iPhone. Scan the QR code, compare the numbers, and approve the request on your Mac. Keep both devices on the same local network.',
   'pairing.buildRequired':
     'Rebuild and install the iOS development app to enable secure pairing. The preview remains available.',
   'pairing.scanner': 'Scan the pairing QR code from your Mac',
@@ -112,11 +112,50 @@ export const en = {
   'pairing.error':
     'Pairing could not be completed. Keep the Mac listener running, check local network permission and Wi-Fi, and create a fresh code if needed. You can verify saved access after a lost confirmation.',
   'pairing.savedNote':
-    'Saved access is not an active remote session. Keep connections enabled on the Mac to verify it.',
+    'Saved access is not an active session. Start connections on the Mac, then open Mac audio or verify this access.',
   'pairing.verify': 'Verify saved access',
   'pairing.forget': 'Forget this Mac',
   'pairing.cancel': 'Cancel',
   'pairing.scan': 'Pair with your Mac',
   'pairing.scope':
-    'This step saves and verifies access. Real remote controls will be connected next. The preview still uses sample data.',
+    'Pairing saves access. Open Mac audio for real volume and mute controls. The preview uses sample data.',
+  'remoteAudio.navigation': 'Mac audio',
+  'remoteAudio.open': 'Control Mac audio',
+  'remoteAudio.eyebrow': 'CONNECTED TO YOUR SPACE',
+  'remoteAudio.title': 'Sound, within reach.',
+  'remoteAudio.description':
+    'Start connections in the Mac menu, then use your saved access. Changes here affect your Mac.',
+  'remoteAudio.buildRequired': 'Install the updated iOS development build to enable Mac audio.',
+  'remoteAudio.connecting': 'Connecting to your Mac',
+  'remoteAudio.connected': 'Remote audio session active',
+  'remoteAudio.disconnected':
+    'Disconnected. Keep connections enabled on the Mac and check Wi-Fi. A command may have completed before the connection was lost. Reconnect to read the current state.',
+  'remoteAudio.confirmed': 'Confirmed on your Mac',
+  'remoteAudio.volume': 'Volume',
+  'remoteAudio.sliderHint': 'Drag to choose a level. Release to apply it on your Mac.',
+  'remoteAudio.mute': 'Mute Mac audio',
+  'remoteAudio.unmute': 'Unmute Mac audio',
+  'remoteAudio.increase': 'Increase Mac volume by 5 percent',
+  'remoteAudio.decrease': 'Decrease Mac volume by 5 percent',
+  'remoteAudio.muted': 'Muted · volume is preserved',
+  'remoteAudio.volumeUnavailable': 'Volume is read-only or unavailable for this output.',
+  'remoteAudio.muteUnavailable': 'Mute is read-only or unavailable for this output.',
+  'remoteAudio.noOutput': 'No audio output is available.',
+  'remoteAudio.reconnect': 'Reconnect',
+  'remoteAudio.disconnect': 'Disconnect',
+  'remoteAudio.scope':
+    'Audio only. Playback, timers, brightness, and power controls remain planned. The preview stays separate.',
+  'remoteAudio.failure.invalidVolume': 'Choose a volume between 0% and 100%.',
+  'remoteAudio.failure.noOutput': 'No audio output is available.',
+  'remoteAudio.failure.outputChanged':
+    'The output changed. Review the current output and try again.',
+  'remoteAudio.failure.volumeUnavailable': 'This output does not support changing volume.',
+  'remoteAudio.failure.muteUnavailable': 'This output does not support changing mute.',
+  'remoteAudio.failure.hardwareFailure':
+    'The Mac could not apply the change. Review its current state before trying again.',
+  'remoteAudio.failure.observationUnavailable':
+    'Audio changes could not be monitored. Refresh or restart connections on the Mac.',
+  'remoteAudio.adjusting': 'Release to apply on your Mac',
+  'remoteAudio.silent': 'Silent · volume is 0%',
+  'remoteAudio.applying': 'Applying on your Mac…',
 } as const;

@@ -12,7 +12,7 @@ This workspace package provides the shared Swift pairing protocol and the native
 | `src/index.ts`                              | Optional native-module loading and typed facade                                                            |
 | `Tests/RemotePairingTests/`                 | Protocol, expiry, replay/reservation, input bounds, and Apple-only crypto tests                            |
 
-The initial pairing protocol supports only pairing and saved-access verification. It has no remote audio, media, touchpad, timer, or power handler. Saved access is not an active remote session.
+The original pairing flow saves and verifies access. `openAudio` now opens a distinct authenticated session with absolute audio commands and confirmed snapshots. Media, input, timer, and power actions remain unsupported. Saved access alone is not an active remote session.
 
 ```bash
 swift test --package-path packages/remote-link -Xswiftc -warnings-as-errors
@@ -20,6 +20,12 @@ swift test --package-path packages/remote-link -Xswiftc -warnings-as-errors
 
 The platform-independent suite runs on Linux and macOS. On macOS, SwiftPM also compiles the native Foundation/Security client target, and three additional CryptoKit tests run. The Expo module requires an iOS development build. SwiftPM does not compile the Expo bridge.
 
-On November 20, 2026, all 18 pairing tests passed on the maintainer's Mac (15 portable boundary tests plus three Apple-only crypto tests). The updated iOS development build launched and completed QR pairing, saved-access verification after separately restarting the phone app and Mac Agent, revocation rejection, and successful re-pairing. The signed Mac build's application/team identifier entitlements were verified. The feature's CI run remains pending; broader network and failure-case checks are recorded separately.
+On November 20, 2026, all 18 pairing tests passed on the maintainer's Mac (15 portable boundary tests plus three Apple-only crypto tests). The updated iOS development build launched and completed QR pairing, saved-access verification after separately restarting the phone app and Mac Agent, revocation rejection, and successful re-pairing. The signed Mac build's application/team identifier entitlements were verified. The pairing feature subsequently passed both CI jobs and was merged; current remote-audio CI remains pending; broader network and failure-case checks are recorded separately.
 
 See [Secure Local Pairing](../../docs/secure-pairing.md) for security properties, failure recovery, build steps, limitations, and the device validation checklist.
+
+## Remote Audio Update
+
+`RemoteAudioWire.swift` defines bounded audio DTOs and the session/sequence/rate gate. `PinnedTransport.swift` shares the existing pin policy with `RemoteAudioClient.swift`, which owns the persistent session, native cache, heartbeat, command matching, deadlines, and cancellation. The Expo facade exposes `audioAPIVersion` for old-binary detection. No credentials or hardware UIDs cross into JavaScript.
+
+The shared JSON fixture in `Tests/RemotePairingTests/Fixtures/` is consumed by Swift and mobile tests. The current portable protocol suite has 25 tests passing on Linux; all 28 tests, including the three Apple-only cases, subsequently passed on the Mac. The maintainer subsequently passed Apple compilation and the initial volume/mute/synchronization device checks. The maintainer also reported the UI follow-up working and verified active revocation/re-pairing. Feature CI and the broader failure matrix remain pending. See [Authenticated Remote Audio](../../docs/remote-audio-control.md).

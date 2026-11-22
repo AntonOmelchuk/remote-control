@@ -168,7 +168,7 @@ struct AudioOutputServiceTests {
     }
 
     @Test
-    func replacingSubscriptionDoesNotLetOldTerminationCancelTheNewObserver() async throws {
+    func simultaneousSubscribersReceiveChangesThroughOneHardwareObserver() async throws {
         let hardware = try FakeAudioHardware(output: fixture())
         let service = AudioOutputService(hardware: hardware)
         let first = await service.updates()
@@ -177,12 +177,50 @@ struct AudioOutputServiceTests {
         let second = await service.updates()
         var secondIterator = second.makeAsyncIterator()
         _ = await secondIterator.next()
+        _ = await firstIterator.next()
         let changed = try fixture(volume: .writable(VolumeLevel(0.3)))
         hardware.replaceOutput(changed)
         let update = await secondIterator.next()
+        let firstUpdate = await firstIterator.next()
+        #expect(update?.state == .output(changed))
+        #expect(firstUpdate == update)
+        #expect(hardware.activeObservers == 1)
+        await service.stopObserving()
+    }
+
+    @Test
+    func cancellingOneSubscriberKeepsTheOtherAndTheHardwareObserverAlive() async throws {
+        let hardware = try FakeAudioHardware(output: fixture())
+        let service = AudioOutputService(hardware: hardware)
+        let first = await service.updates()
+        let reader = Task { for await _ in first { if Task.isCancelled { break } } }
+        let second = await service.updates()
+        var iterator = second.makeAsyncIterator()
+        _ = await iterator.next()
+        reader.cancel()
+        await reader.value
+        let changed = try fixture(volume: .writable(VolumeLevel(0.7)))
+        hardware.replaceOutput(changed)
+        let update = await iterator.next()
         #expect(update?.state == .output(changed))
         #expect(hardware.activeObservers == 1)
         await service.stopObserving()
+    }
+
+    @Test
+    func stoppingAllSubscribersFinishesEveryStream() async throws {
+        let hardware = try FakeAudioHardware(output: fixture())
+        let service = AudioOutputService(hardware: hardware)
+        let first = await service.updates()
+        let second = await service.updates()
+        var a = first.makeAsyncIterator()
+        var b = second.makeAsyncIterator()
+        _ = await a.next()
+        _ = await b.next()
+        await service.stopObserving()
+        #expect(await a.next() == nil)
+        #expect(await b.next() == nil)
+        #expect(hardware.activeObservers == 0)
     }
 
     @Test

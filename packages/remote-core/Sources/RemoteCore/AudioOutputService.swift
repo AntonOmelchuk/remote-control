@@ -1,28 +1,27 @@
 import Foundation
 
-/// Owns hardware access and one active UI subscription. No hardware write is retried or retargeted.
+/// Owns hardware access and independent UI and transport subscriptions. No hardware write is retried or retargeted.
 public actor AudioOutputService {
     private let hardware: any AudioHardwarePort
     private var revision: UInt64 = 0
     private var generation: UUID?
     private var observedOutput: AudioOutputID?
     private var observation: (any AudioObservation)?
-    private var continuation: AsyncStream<AudioUpdate>.Continuation?
+    private var continuations: [UUID: AsyncStream<AudioUpdate>.Continuation] = [:]
 
     public init(hardware: any AudioHardwarePort) {
         self.hardware = hardware
     }
 
     public func updates() -> AsyncStream<AudioUpdate> {
-        stopObserving()
-        let session = UUID()
-        generation = session
+        let subscription = UUID()
+        if generation == nil { generation = UUID() }
         let pair = AsyncStream<AudioUpdate>.makeStream(bufferingPolicy: .bufferingNewest(1))
-        continuation = pair.continuation
+        continuations[subscription] = pair.continuation
         pair.continuation.onTermination = { [weak self] _ in
-            Task { await self?.stopObserving(generation: session) }
+            Task { await self?.removeSubscription(subscription) }
         }
-        _ = refresh(forceObservation: true)
+        _ = refresh(forceObservation: observation == nil)
         return pair.stream
     }
 
@@ -55,13 +54,14 @@ public actor AudioOutputService {
         observation?.cancel()
         observation = nil
         observedOutput = nil
-        continuation?.finish()
-        continuation = nil
+        let active = Array(continuations.values)
+        continuations.removeAll()
+        for continuation in active { continuation.finish() }
     }
 
-    private func stopObserving(generation session: UUID) {
-        guard generation == session else { return }
-        stopObserving()
+    private func removeSubscription(_ id: UUID) {
+        continuations.removeValue(forKey: id)
+        if continuations.isEmpty { stopObserving() }
     }
 
     private func currentOutput(expected: AudioOutputID) throws -> AudioOutputSnapshot {
@@ -96,7 +96,7 @@ public actor AudioOutputService {
         }
         revision &+= 1
         let update = AudioUpdate(revision: revision, state: state)
-        continuation?.yield(update)
+        for continuation in continuations.values { continuation.yield(update) }
         return update
     }
 

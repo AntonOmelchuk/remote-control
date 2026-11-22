@@ -4,7 +4,7 @@ An iPhone remote for controlling a MacBook over a local network.
 
 The product provides convenient access to audio, video playback, and selected system actions from a phone. The engineering goals are maintainable code, a secure command protocol, and predictable behavior when connectivity is interrupted.
 
-**Status: secure pairing verified on a physical iPhone and Mac.** The mobile app includes a home screen, connection guide, pairing flow, interactive remote preview, and persistent English/Ukrainian language and system/light/dark preferences. On November 20, 2026, the maintainer verified QR pairing with Mac approval, saved-access verification after restarting each app, revocation, and successful re-pairing. The Mac Agent also provides locally verified volume/mute controls. Phone remote actions still use preview state; authenticated remote audio is the next implementation milestone. Final local checks passed 15 mobile tests and 33 Swift tests alongside formatting, lint, TypeScript, and the native Debug build. SignedDebug compilation, Apple signature verification, and application/team identifier entitlements were separately checked on the Mac. Feature-branch CI remains pending.
+**Status: authenticated remote audio verified on the primary devices; feature CI pending.** The iPhone controls real Mac volume and mute through the saved-access credential and pinned WSS session. The maintainer verified external-state synchronization, use with the Mac panel closed, the slider/zero-volume UI follow-up, Stop/Start recovery after reopening the route, active-session revocation, rejected reconnect, and successful re-pairing. Native Mac checks passed all 45 Swift tests, and the updated iOS app compiled and launched on the physical iPhone. Implementation-workspace checks passed 23 mobile tests and 42 portable Swift tests. Final mobile checks after the UI follow-up and this feature's CI remain pending. The preview remains separate sample state. See [Authenticated Remote Audio](docs/remote-audio-control.md) for exact recorded results and remaining coverage.
 
 ## Contents
 
@@ -23,30 +23,30 @@ The product provides convenient access to audio, video playback, and selected sy
 - [Demo and Screenshots](#demo-and-screenshots)
 - [References](#references)
 
-**Completed locally: secure local pairing.** QR onboarding, pinned TLS 1.3, Mac approval, Keychain credentials, saved-access verification, and revocation passed the physical-device workflow. Pairing does not yet connect the remote controls. See [Secure Local Pairing](docs/secure-pairing.md).
+**Current milestone: authenticated remote audio.** The source connects the saved-access credential to a foreground audio session, validates absolute commands against the current output, and separates paired devices from active sessions. Primary native/device checks, the UI follow-up smoke check, and active-session revocation/re-pairing passed. Final quality checks, CI, and broader failure/device coverage remain. See [Authenticated Remote Audio](docs/remote-audio-control.md) and the prior [Secure Local Pairing](docs/secure-pairing.md).
 
 ## Features and Status
 
-| Feature                | Scope                                                                      | Status                                                                    |
-| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Mobile client          | React Native, TypeScript, Expo Router                                      | Compiled, signed, installed, and opened on iPhone XR                      |
-| macOS Agent shell      | SwiftUI menu-bar panel, setup status, and Quit action                      | Shell baseline CI passed; local audio build and primary controls verified |
-| iOS development build  | Local Xcode compilation, signing, installation, and Metro connection       | Manually verified on iPhone XR, iOS 18.7.12                               |
-| Interactive preview    | Volume, mute, playback state, seeking, and timer preset selection          | Implemented with local sample state only                                  |
-| Pairing                | Add an iPhone using a QR code and confirmation on the Mac                  | Verified locally on Mac and physical iPhone; feature CI pending           |
-| Audio control          | Volume and mute on the current Mac output                                  | Verified locally on built-in speakers; iPhone integration planned         |
-| YouTube                | Play/pause, seeking, and tab selection                                     | Planned for MVP                                                           |
-| Timer                  | Pause the selected video after a custom duration                           | Planned for MVP; preview currently uses presets                           |
-| Localization           | System language, English, and Ukrainian; typed bundled resources           | Implemented; prior detailed checks in Expo Go and native smoke check      |
-| Appearance             | System, light, and dark themes                                             | Implemented; prior detailed checks in Expo Go and native smoke check      |
-| Preferences            | Persistent language and appearance choices                                 | Persistence checked in Expo Go; native smoke check completed              |
-| Video websites         | Playback controls and next episode                                         | After MVP; a separate site adapter is required                            |
-| Mac sleep and shutdown | Standard system actions                                                    | After API and permission validation                                       |
-| Brightness             | Hardware display brightness                                                | Experimental; requires testing on the target MacBook                      |
-| Touchpad               | Pointer movement, clicking, and scrolling                                  | Later milestone                                                           |
-| Quality tooling        | ESLint, Prettier, Husky, and lint-staged                                   | Configured; pre-commit and pre-push verified                              |
-| CI                     | Automated formatting, lint, type checks, and unit tests                    | Existing workflow verified; unit tests added to `pnpm check`              |
-| Branch protection      | Pull requests, required CI, deletion protection, and force-push protection | Active for `main`                                                         |
+| Feature                | Scope                                                                      | Status                                                                                |
+| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Mobile client          | React Native, TypeScript, Expo Router                                      | Compiled, signed, installed, and opened on iPhone XR                                  |
+| macOS Agent shell      | SwiftUI menu-bar panel, setup status, and Quit action                      | Shell baseline CI passed; local audio build and primary controls verified             |
+| iOS development build  | Local Xcode compilation, signing, installation, and Metro connection       | Manually verified on iPhone XR, iOS 18.7.12                                           |
+| Interactive preview    | Volume, mute, playback state, seeking, and timer preset selection          | Implemented with local sample state only                                              |
+| Pairing                | Add an iPhone using a QR code and confirmation on the Mac                  | Pairing baseline CI passed; live audio revocation/re-pairing verified locally         |
+| Audio control          | Volume and mute on the current Mac output                                  | Volume/mute/sync and slider follow-up verified on primary devices; feature CI pending |
+| YouTube                | Play/pause, seeking, and tab selection                                     | Planned for MVP                                                                       |
+| Timer                  | Pause the selected video after a custom duration                           | Planned for MVP; preview currently uses presets                                       |
+| Localization           | System language, English, and Ukrainian; typed bundled resources           | Implemented; prior detailed checks in Expo Go and native smoke check                  |
+| Appearance             | System, light, and dark themes                                             | Implemented; prior detailed checks in Expo Go and native smoke check                  |
+| Preferences            | Persistent language and appearance choices                                 | Persistence checked in Expo Go; native smoke check completed                          |
+| Video websites         | Playback controls and next episode                                         | After MVP; a separate site adapter is required                                        |
+| Mac sleep and shutdown | Standard system actions                                                    | After API and permission validation                                                   |
+| Brightness             | Hardware display brightness                                                | Experimental; requires testing on the target MacBook                                  |
+| Touchpad               | Pointer movement, clicking, and scrolling                                  | Later milestone                                                                       |
+| Quality tooling        | ESLint, Prettier, Husky, and lint-staged                                   | Configured; pre-commit and pre-push verified                                          |
+| CI                     | Automated formatting, lint, type checks, and unit tests                    | Existing workflow verified; unit tests added to `pnpm check`                          |
+| Branch protection      | Pull requests, required CI, deletion protection, and force-push protection | Active for `main`                                                                     |
 
 The first target configuration is a physical iPhone, an Apple Silicon MacBook, and Chrome. Support for additional devices and browsers will follow validation of the primary workflow.
 
@@ -58,7 +58,7 @@ Visual quality is a product requirement.
 
 The mobile shell uses graphite surfaces and a soft lime accent in dark mode, with a separate light palette using darker green accents. Both modes share system typography, SF Symbols, rounded controls, and generous spacing. The Mac illustration is built from native views rather than a downloaded image. The interface scrolls on smaller screens and keeps text scaling enabled. The preview layout has been reviewed on an iPhone. Further device checks will cover larger text sizes, contrast, VoiceOver behavior, and one-handed use.
 
-The current mobile app contains the home, connection guide, pairing, interactive preview, and Settings screens. Planned connected-product screens include:
+The current mobile app contains the home, connection guide, pairing, Mac audio, interactive preview, and Settings screens. Planned connected-product screens include:
 
 - Automatic Mac discovery.
 - A remote with current media, volume, and timer controls.
@@ -71,7 +71,7 @@ Animations and haptics should support user actions. Contrast, text scaling, acce
 
 ## Architecture
 
-The product architecture separates three application components. The mobile app and macOS Agent run on their target devices. Secure pairing and saved-access verification are locally verified. Authenticated remote audio and the browser extension are the next integration boundaries:
+The product architecture separates three application components. The mobile app and macOS Agent run on their target devices. Secure pairing and saved-access verification are locally verified. The remote audio integration is prepared in source and awaits native/device checks; browser integration remains planned:
 
 1. **Mobile client:** the user interface, connection management, and presentation of confirmed state.
 2. **macOS Agent:** a local command server, system API integration, timer execution, and permission enforcement.
@@ -103,37 +103,38 @@ These names describe the intended organization. Concrete files and interfaces wi
 
 ## Repository Structure
 
-| Path                                       | Responsibility                                                             | Status                                                          |
-| ------------------------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `apps/mobile/`                             | React Native mobile application                                            | Native development build running on iPhone XR                   |
-| `apps/mobile/ios/`                         | Generated Xcode project and CocoaPods integration                          | Generated locally; ignored by Git                               |
-| `apps/mobile/src/app/`                     | Root navigator and thin route entry points                                 | Implemented                                                     |
-| `apps/mobile/src/components/`              | Shared UI primitives                                                       | Implemented                                                     |
-| `apps/mobile/src/design-system/`           | Light/dark palettes, design tokens, and theme-aware style hooks            | Implemented                                                     |
-| `apps/mobile/src/localization/`            | Typed English/Ukrainian resources and a language-bound translation hook    | Implemented                                                     |
-| `apps/mobile/src/preferences/`             | Preference types, restoration, context, and serialized storage writes      | Implemented                                                     |
-| `apps/mobile/src/features/settings/`       | Language and appearance controls                                           | Implemented                                                     |
-| `apps/mobile/src/package.json`             | ESM scope for source modules used by Node-based tests                      | Configured                                                      |
-| `apps/mobile/tests/`                       | Preferences, localization, contrast, and native-summary tests              | 15 tests passed locally; feature CI pending                     |
-| `apps/mobile/src/features/pairing/`        | QR scan, approval comparison, and saved-access UI                          | Verified locally                                                |
-| `apps/mobile/src/features/connection/`     | Disconnected home, Mac illustration, and connection guide                  | Implemented; discovery planned                                  |
-| `apps/mobile/src/features/remote-preview/` | Preview screen, cards, timer picker, and isolated UI state                 | Implemented; local preview only                                 |
-| `packages/remote-link/`                    | Shared Swift pairing protocol, native iOS transport, and typed Expo facade | Verified locally on Mac and physical iPhone; feature CI pending |
-| `apps/macos/`                              | SwiftUI Agent shell and native project configuration                       | Built and manually checked locally                              |
-| `apps/macos/project.yml`                   | Declarative macOS application target and scheme                            | Project generation and native build passed locally              |
-| `apps/macos/Sources/`                      | Menu-bar scene, audio adapter, pairing server, and panel UI                | Implemented and checked locally                                 |
-| `apps/browser-extension/`                  | Chrome extension and media adapters                                        | Planned                                                         |
-| `packages/protocol/`                       | Command schemas, TypeScript models, and fixtures                           | Planned                                                         |
-| `packages/remote-core/`                    | Shared Swift audio models, service, hardware port, and 15 safety tests     | 15 tests passed on macOS and Linux; see audio notes             |
-| `docs/`                                    | Technical explanations and guides                                          | Added incrementally                                             |
-| `package.json`                             | Root commands and tooling configuration                                    | Configured                                                      |
-| `pnpm-workspace.yaml`                      | pnpm workspace boundaries                                                  | Configured                                                      |
-| `pnpm-lock.yaml`                           | Resolved dependency tree                                                   | Created                                                         |
-| `.nvmrc`                                   | Selected Node.js version                                                   | Configured                                                      |
-| `.husky/`                                  | Pre-commit and pre-push commands                                           | Both hooks verified                                             |
-| `apps/mobile/eslint.config.cjs`            | Expo lint rules and compatibility adapter                                  | Configured                                                      |
-| `.prettierrc.json`                         | Shared formatting policy                                                   | Configured                                                      |
-| `.github/workflows/ci.yml`                 | GitHub Actions formatting, lint, and type checks                           | Implemented and verified                                        |
+| Path                                       | Responsibility                                                                   | Status                                                                        |
+| ------------------------------------------ | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `apps/mobile/`                             | React Native mobile application                                                  | Native development build running on iPhone XR                                 |
+| `apps/mobile/ios/`                         | Generated Xcode project and CocoaPods integration                                | Generated locally; ignored by Git                                             |
+| `apps/mobile/src/app/`                     | Root navigator and thin route entry points                                       | Implemented                                                                   |
+| `apps/mobile/src/components/`              | Shared UI primitives                                                             | Implemented                                                                   |
+| `apps/mobile/src/design-system/`           | Light/dark palettes, design tokens, and theme-aware style hooks                  | Implemented                                                                   |
+| `apps/mobile/src/localization/`            | Typed English/Ukrainian resources and a language-bound translation hook          | Implemented                                                                   |
+| `apps/mobile/src/preferences/`             | Preference types, restoration, context, and serialized storage writes            | Implemented                                                                   |
+| `apps/mobile/src/features/settings/`       | Language and appearance controls                                                 | Implemented                                                                   |
+| `apps/mobile/src/package.json`             | ESM scope for source modules used by Node-based tests                            | Configured                                                                    |
+| `apps/mobile/tests/`                       | Preferences, localization, contrast, and native-summary tests                    | 23 mobile tests passed in the implementation workspace; feature CI pending    |
+| `apps/mobile/src/features/pairing/`        | QR scan, approval comparison, and saved-access UI                                | Verified locally                                                              |
+| `apps/mobile/src/features/connection/`     | Disconnected home, Mac illustration, and connection guide                        | Implemented; discovery planned                                                |
+| `apps/mobile/src/features/remote-audio/`   | Authenticated audio screen, validated summaries, and foreground session          | Primary device workflow verified; feature CI pending                          |
+| `apps/mobile/src/features/remote-preview/` | Preview screen, cards, timer picker, and isolated UI state                       | Implemented; local preview only                                               |
+| `packages/remote-link/`                    | Shared Swift pairing protocol, native iOS transport, and typed Expo facade       | Pairing baseline CI passed; live audio revocation/re-pairing verified locally |
+| `apps/macos/`                              | SwiftUI Agent shell and native project configuration                             | Built and manually checked locally                                            |
+| `apps/macos/project.yml`                   | Declarative macOS application target and scheme                                  | Project generation and native build passed locally                            |
+| `apps/macos/Sources/`                      | Menu-bar scene, audio adapter, pairing server, and panel UI                      | Implemented and checked locally                                               |
+| `apps/browser-extension/`                  | Chrome extension and media adapters                                              | Planned                                                                       |
+| `packages/protocol/`                       | Command schemas, TypeScript models, and fixtures                                 | Planned                                                                       |
+| `packages/remote-core/`                    | Shared Swift audio models, multicast service, hardware port, and 17 safety tests | 17 pass on Linux; updated native validation pending                           |
+| `docs/`                                    | Technical explanations and guides                                                | Added incrementally                                                           |
+| `package.json`                             | Root commands and tooling configuration                                          | Configured                                                                    |
+| `pnpm-workspace.yaml`                      | pnpm workspace boundaries                                                        | Configured                                                                    |
+| `pnpm-lock.yaml`                           | Resolved dependency tree                                                         | Created                                                                       |
+| `.nvmrc`                                   | Selected Node.js version                                                         | Configured                                                                    |
+| `.husky/`                                  | Pre-commit and pre-push commands                                                 | Both hooks verified                                                           |
+| `apps/mobile/eslint.config.cjs`            | Expo lint rules and compatibility adapter                                        | Configured                                                                    |
+| `.prettierrc.json`                         | Shared formatting policy                                                         | Configured                                                                    |
+| `.github/workflows/ci.yml`                 | GitHub Actions formatting, lint, and type checks                                 | Implemented and verified                                                      |
 
 The pnpm workspace manages JavaScript and TypeScript packages with their own `package.json` files. Swift projects can live in the same Git repository, while Swift Package Manager and Xcode manage their dependencies and builds.
 
@@ -226,28 +227,28 @@ make -C apps/macos run DEVELOPMENT_TEAM=YOUR_TEAM_ID
 
 Pairing uses the developer-signed `SignedDebug` configuration. Supply your own team ID or create the ignored local signing configuration described in [the Mac guide](apps/macos/README.md). The default quality-check/CI `Debug` build stays ad hoc. The signed launch target verifies the built signature and application/team identifier entitlements before opening the app.
 
-The menu-bar Agent now includes local audio controls alongside phone-connection status and a Quit action. The expanded native check and the primary volume/mute controls passed on the maintainer's built-in speakers on November 19, 2026. Output switching, unsupported devices, and accessibility remain unverified. QR pairing, saved-access verification, persistence across app restarts, revocation, and re-pairing passed the physical-device workflow on November 20, 2026. A continuous authenticated command session remains planned. The maintainer passed `make -C apps/macos check` and verified launch, Quit and relaunch, light/dark appearance, and both bundled languages on November 18, 2026. The shell baseline passed the native CI job; the expanded audio workflow awaits verification. See [the macOS package guide](apps/macos/README.md) and [macOS Agent Shell](docs/macos-agent-shell.md) for the file map and validation checklist.
+The menu-bar Agent now includes local audio controls alongside phone-connection status and a Quit action. The expanded native check and the primary volume/mute controls passed on the maintainer's built-in speakers on November 19, 2026. Output switching, unsupported devices, and accessibility remain unverified. QR pairing, saved-access verification, persistence across app restarts, revocation, and re-pairing passed the physical-device workflow on November 20, 2026. The persistent audio-only session has passed primary native/device checks; broader coverage and feature CI remain pending. The maintainer passed `make -C apps/macos check` and verified launch, Quit and relaunch, light/dark appearance, and both bundled languages on November 18, 2026. The shell baseline passed the native CI job; the pairing baseline passed both CI jobs; the current audio integration still requires verification. See [the macOS package guide](apps/macos/README.md) and [macOS Agent Shell](docs/macos-agent-shell.md) for the file map and validation checklist.
 
 Commands for the browser extension will be added with its implementation.
 
 ## Code Quality
 
-Local quality checks and GitHub Actions are configured. `pnpm check` includes 15 platform-independent unit tests, and the pre-push hook runs the same command. Local iOS compilation and launch have been manually verified. The separate macOS build workflow passed for the shell baseline and now includes the new Swift core tests; this feature's native CI execution remains pending. Automated iOS builds and connected command contract tests remain planned.
+Local quality checks and GitHub Actions are configured. `pnpm check` includes 23 platform-independent unit tests, and the pre-push hook runs the same command. Local iOS compilation and launch have been manually verified. The separate macOS build workflow passed for the shell baseline and now includes the new Swift core tests; the current remote-audio feature's native CI execution remains pending. Automated iOS builds and connected command contract tests remain planned.
 
 | Mechanism                    | Responsibility                                                                 | Current Status                                                                         |
 | ---------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| TypeScript strict mode       | Application type consistency                                                   | Passing locally and in CI                                                              |
-| ESLint flat config           | JavaScript/TypeScript, React, and hooks rules                                  | Passing locally and in CI with the compatibility adapter                               |
-| Prettier                     | Consistent TS/JS/JSON/YAML/Markdown formatting                                 | Passing locally and in CI                                                              |
+| TypeScript strict mode       | Application type consistency                                                   | Passing in the implementation workspace; baseline CI verified                          |
+| ESLint flat config           | JavaScript/TypeScript, React, and hooks rules                                  | Passing in the implementation workspace; baseline CI verified                          |
+| Prettier                     | Consistent TS/JS/JSON/YAML/Markdown formatting                                 | Passing in the implementation workspace; baseline CI verified                          |
 | Husky pre-commit             | Run lint-staged during a commit                                                | Verified during the initial commit                                                     |
 | lint-staged                  | Lint and format staged files using their nearest configuration                 | Verified during the initial commit                                                     |
 | Husky pre-push               | Run the full local check before a push                                         | Verified during pushes and with a restricted PATH                                      |
 | GitHub Actions               | Run quality checks on pushes and pull requests targeting `main`                | Implemented and verified                                                               |
-| Unit tests                   | Preference recovery, persistence, localization, contrast, and native summaries | 15 tests pass; included in `pnpm check`                                                |
-| Swift core tests             | Audio command safety and observer lifecycle                                    | 15 passed on macOS and in the implementation workspace on Swift 6.0.3/Linux            |
-| Swift pairing tests          | Invitation/frame validation, single use, deadlines, and Apple crypto           | 18 passed on macOS; 15 portable tests also passed on Linux                             |
-| Contract tests               | Connected command contracts                                                    | Planned                                                                                |
-| Swift formatting and linting | Native Swift source style                                                      | Passed locally through `make -C apps/macos check`                                      |
+| Unit tests                   | Preference recovery, persistence, localization, contrast, and native summaries | 23 tests pass in the implementation workspace; included in `pnpm check`                |
+| Swift core tests             | Audio command safety and observer lifecycle                                    | 17 passed on the Mac and Swift 6.0.3/Linux                                             |
+| Swift pairing tests          | Invitation/frame validation, single use, deadlines, and Apple crypto           | 25 portable tests pass on Linux; all 28 including crypto passed on the Mac             |
+| Contract tests               | Shared Swift/TypeScript audio fixture; connected device scenarios              | Fixture tests and primary manual audio scenarios passed; broader cases pending         |
+| Swift formatting and linting | Native Swift source style                                                      | Passed strict lint in the implementation workspace and on the Mac                      |
 | Native build checks          | Compilation, installation, and launch                                          | iOS launch, Mac Debug/SignedDebug builds, and physical-device pairing verified locally |
 | Required status checks       | Successful CI checks before merging                                            | Active for `main`; `Quality checks` is required                                        |
 
@@ -305,7 +306,7 @@ The `Quality checks` job runs on Ubuntu 24.04 and performs the following steps:
 
 The workflow has read-only repository contents permissions, disables Husky on the runner, caches the pnpm store, and limits job execution to 15 minutes. Newer runs cancel older runs in the same concurrency group. Third-party actions are pinned to full commit hashes.
 
-This Ubuntu job validates the JavaScript and TypeScript setup and runs the platform-independent unit tests. It does not compile native Apple targets. The separate [macOS Agent workflow](.github/workflows/macos.yml) runs strict Swift lint, Swift core tests, and a Debug app build for changes under `apps/macos/`, `packages/remote-core/`, `packages/remote-link/`, or that workflow. It passed for the shell and audio baselines; execution for the pairing feature remains pending. The new path-filtered `macOS build` status is not yet a required branch-protection check; see the [Mac shell guide](docs/macos-agent-shell.md#quality-checks-and-ci).
+This Ubuntu job validates the JavaScript and TypeScript setup and runs the platform-independent unit tests. It does not compile native Apple targets. The separate [macOS Agent workflow](.github/workflows/macos.yml) runs strict Swift lint, Swift core tests, and a Debug app build for changes under `apps/macos/`, `packages/remote-core/`, `packages/remote-link/`, or that workflow. It passed for the shell and audio baselines; execution for the new remote-audio feature remains pending. The new path-filtered `macOS build` status is not yet a required branch-protection check; see the [Mac shell guide](docs/macos-agent-shell.md#quality-checks-and-ci).
 
 ### Main Branch Protection
 
@@ -336,7 +337,7 @@ Tests should cover behavior where failures matter: authentication, access revoca
 
 Implemented pairing properties include a short-lived single-use QR secret, Mac approval, native certificate pinning, separate phone credentials, app-scoped Data Protection Keychain storage, bounded protocol frames, and revocation. The primary pairing/persistence/revocation workflow passed local device checks; this is not a penetration test or a claim of universal device coverage. See [Secure Local Pairing](docs/secure-pairing.md) for exact boundaries and remaining cases.
 
-Planned command-session properties include:
+Audio-session sequencing, bounded queues, current-output validation, and active-peer revocation are implemented in the new source and await device validation. Broader command-session properties include:
 
 - Active-session termination and revocation enforcement for continuous remote sessions.
 - An explicit command allowlist with argument and permission validation.
@@ -351,11 +352,11 @@ Bonjour provides discovery, not proof of trust. Sharing the same Wi-Fi network d
 
 The iPhone and Mac must have a reachable network path. Guest-network isolation and firewalls can block communication.
 
-Command-session permissions, execution validation, and recovery semantics must be implemented and checked before live phone remote controls are enabled.
+The audio-only command path now defines these rules in source; native and physical-device checks remain required. Media, timer, input, and power contracts must be designed and validated separately.
 
 ## State and Connection Recovery
 
-The Mac is the source of system state, while the extension supplies the state of the selected media player. The phone displays a received snapshot and subsequent updates.
+The Mac is the source of audio state; the new audio route displays confirmed snapshots and subsequent updates. The planned browser extension will supply media-player state.
 
 After a connection is interrupted:
 
@@ -383,6 +384,8 @@ The timer runs on the Mac and does not depend on the iPhone screen remaining ope
 - TestFlight builds have a limited availability period; distribution will be configured separately.
 
 ## Documentation
+
+- [Authenticated remote audio](docs/remote-audio-control.md): current source ownership, protocol, limits, builds, and device checklist.
 
 Documentation is updated in the same change that modifies functionality, architecture, or setup.
 
@@ -417,7 +420,7 @@ This table is a documentation plan; it does not imply that all listed files alre
 
 Each module should document its responsibility and relationships. Complex public functions and contracts should also be documented near the code: arguments, results, errors, and important constraints. README should not manually duplicate the implementation of every internal function.
 
-A pairing sequence diagram is included in the secure-pairing guide. Planned diagrams cover components, the authenticated command path, connection recovery, and timer lifecycle. Each diagram is added once the corresponding behavior is defined.
+Pairing and audio-command sequence diagrams are included in the secure-pairing and remote-audio guides. Planned diagrams cover components, the authenticated command path, connection recovery, and timer lifecycle. Each diagram is added once the corresponding behavior is defined.
 
 ### Project Language
 
@@ -431,8 +434,8 @@ Comments should explain intent, constraints, or non-obvious decisions rather tha
 2. Implemented: the mobile shell and local remote preview; unused starter UI and images removed. Review the legacy reset script and remaining browser dependencies separately.
 3. Implemented: persistent language and appearance preferences, with detailed Expo Go checks and a subsequent native smoke check. Continue accessibility and broader device validation.
 4. Completed locally: compile, sign, install, and launch a custom development build on iPhone XR. Automated iOS builds and distribution remain planned.
-5. Verified: the macOS menu-bar shell, native build, lifecycle, appearance, localization, and baseline CI. Local CoreAudio volume/mute control and all 15 shared Swift tests also passed on the Mac. Complete device-switching/accessibility checks and address the recorded button flicker in a future update.
-6. Verified locally: secure pairing, saved-access persistence after restarting both apps, revocation, and re-pairing. Next: add an authenticated audio command and confirmed volume state, then clarify connection controls/status labels.
+5. Verified: the macOS menu-bar shell, native build, lifecycle, appearance, localization, and baseline CI. Local CoreAudio volume/mute control and all 15 shared Swift tests also passed on the Mac. Complete device-switching/accessibility checks and verify the button-flicker fix included in the remote-audio update.
+6. Verified locally: secure pairing, saved-access persistence after restarting both apps, revocation, and re-pairing. Merged after both CI jobs passed. Remote audio commands, confirmed state, revised connection UI, Stop/Start recovery, and active-session revocation/re-pairing now pass primary-device checks. Complete final quality checks and feature CI, then continue broader coverage.
 7. Add the Chrome extension and YouTube integration.
 8. Add the Mac-hosted timer with arbitrary minute-based duration selection, reconnection, and device-access revocation.
 9. Extend site integrations, power actions, and validated brightness control.
