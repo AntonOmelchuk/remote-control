@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Дозволь Remote Control сканувати код сполучення з твого Mac.",
+    "NSLocalNetworkUsageDescription": "Remote Control з’єднується з твоїм Mac у локальній мережі."
+  }
+}

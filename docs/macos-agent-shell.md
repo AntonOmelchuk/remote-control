@@ -30,7 +30,7 @@ XcodeGen reads `apps/macos/project.yml` and creates `RemoteControlAgent.xcodepro
 
 The manifest defines one application target and one shared scheme. The configured minimum deployment target is macOS 15.0. This value establishes a compiler availability boundary, not a claim that all supported macOS releases have been manually tested.
 
-The local configuration uses ad hoc signing (`CODE_SIGN_IDENTITY = -`) and enables the hardened runtime. It does not register a team, export a signing identity, or create a notarized distribution build. The shell introduces no entitlements or permission prompts. macOS system-control permissions must be designed and validated with the relevant adapters later.
+The original shell used an ad-hoc Debug build. The current quality-check configuration retains that signing mode; Xcode reports Hardened Runtime disabled for ad-hoc signing. The pairing runtime now uses developer-signed SignedDebug with application/team identifier entitlements. See [Secure Local Pairing](secure-pairing.md) for verified signing and Keychain behavior, and the package README for the ignored local team configuration. Distribution signing and notarization remain separate work.
 
 See [ADR 0002](adr/0002-macos-project-generation.md) for tradeoffs and [the package README](../apps/macos/README.md) for exact commands.
 
@@ -48,7 +48,7 @@ The first command retains the existing mobile and documentation checks. The seco
 
 The new `.github/workflows/macos.yml` defines `macOS build` on `macos-26`, selecting the documented Xcode 26.6 installation. The maintainer's local Xcode is 27.2. The workflow logs tool versions, installs XcodeGen through Homebrew, and runs the same native check as local development. Its generator installation follows Homebrew rather than an exact package lock; the specification enforces the minimum supported generator version. Toolchain changes require review if generation or formatting behavior changes.
 
-The job has read-only repository contents permissions, does not persist checkout credentials, and has a 15-minute timeout. Push and pull-request path filters now cover `apps/macos/**`, `packages/remote-core/**`, and the workflow itself. The existing Ubuntu `Quality checks` job remains separate.
+The job has read-only repository contents permissions, does not persist checkout credentials, and has a 15-minute timeout. Push and pull-request path filters now cover `apps/macos/**`, `packages/remote-core/**`, `packages/remote-link/**`, and the workflow itself. The existing Ubuntu `Quality checks` job remains separate.
 
 The new status is **not yet a required branch-protection check**. Do not make a path-filtered workflow an unconditional required check: a pull request outside those paths may not produce that status. Define an always-reporting job before changing branch-protection requirements.
 
@@ -88,14 +88,14 @@ The following checks remain unrecorded:
 - Explicit confirmation that the app has no Dock icon.
 - VoiceOver labels, keyboard focus, and the Quit keyboard shortcut.
 - Generated-file exclusions verified against the actual post-build Git status.
-- The expanded audio workflow run; the shell baseline already passed both GitHub jobs.
+- The current pairing feature workflow run; both shell and audio baselines passed GitHub checks.
 - A wider device/OS matrix, including the configured minimum macOS deployment version.
 
-Local native checks are separate from `pnpm check`. Run the repository checks again before committing this milestone; the existing 13 mobile unit tests do not test the macOS UI.
+Local native checks are separate from `pnpm check`. The pairing milestone subsequently passed both commands, including 15 mobile and 33 Swift tests. The mobile tests do not test the macOS UI.
 
 ## Next Integration Boundary
 
-The next milestone should first validate a Mac system adapter and its permission requirements, then introduce a bounded command contract and authenticated transport. Pairing, connection state, and actual device controls require implementation and tests before this status can change to accepting phone connections.
+Local Core Audio controls and secure pairing have since been implemented and verified on the maintainer's devices. The next boundary is authenticated remote audio: bounded commands, current-device validation, confirmed state, and connection recovery. Saved pairing access is not a continuous command session. See [macOS Audio Control](macos-audio-control.md) and [Secure Local Pairing](secure-pairing.md).
 
 ## References
 
