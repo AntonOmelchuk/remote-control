@@ -116,7 +116,8 @@ public struct PairingInvitation: Codable, Equatable, Sendable {
 
 public struct PairingFrame: Codable, Sendable {
     public enum Kind: String, Codable, Sendable {
-        case request, grant, acknowledge, paired, rejected, authenticate, authenticated, openAudio
+        case request, grant, acknowledge, paired, rejected, authenticate, authenticated, openAudio,
+            attachBrowser, browserAttached
     }
     public var version = 1
     public var type: Kind

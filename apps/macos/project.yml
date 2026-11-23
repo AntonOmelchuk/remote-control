@@ -1,21 +1,17 @@
 name: RemoteControlAgent
-
 options:
   minimumXcodeGenVersion: 2.46.0
   developmentLanguage: en
   deploymentTarget:
     macOS: '15.0'
   createIntermediateGroups: true
-
 configs:
   Debug: debug
   SignedDebug: debug
   Release: release
-
 packages:
   RemoteCore:
     path: ../../packages/remote-core
-
   RemoteLink:
     path: ../../packages/remote-link
   SwiftCertificates:
@@ -27,7 +23,6 @@ packages:
   SwiftASN1:
     url: https://github.com/apple/swift-asn1.git
     exactVersion: 1.3.1
-
 targets:
   RemoteControlAgent:
     type: application
@@ -54,23 +49,43 @@ targets:
       base:
         SWIFT_VERSION: '6.0'
         SWIFT_STRICT_CONCURRENCY: complete
-        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: true
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: '-'
-        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_HARDENED_RUNTIME: true
         PRODUCT_NAME: RemoteControlAgent
         PRODUCT_BUNDLE_IDENTIFIER: com.antonomelchuk.remotecontrol.agent
         MARKETING_VERSION: 0.1.0
         CURRENT_PROJECT_VERSION: 1
-        GENERATE_INFOPLIST_FILE: NO
+        GENERATE_INFOPLIST_FILE: false
         INFOPLIST_FILE: Resources/Info.plist
       configs:
         SignedDebug:
           CODE_SIGN_STYLE: Automatic
           CODE_SIGN_IDENTITY: Apple Development
           CODE_SIGN_ENTITLEMENTS: Resources/RemoteControlAgent.entitlements
-          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: YES
-
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: true
+  RemoteControlBrowserHost:
+    type: tool
+    platform: macOS
+    sources:
+      - path: BrowserHost
+      - path: ../../packages/remote-link/apple/PinnedTransport.swift
+    dependencies:
+      - package: RemoteLink
+        product: RemotePairing
+    settings:
+      base:
+        SWIFT_VERSION: '6.0'
+        SWIFT_STRICT_CONCURRENCY: complete
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: 'YES'
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: '-'
+        PRODUCT_NAME: RemoteControlBrowserHost
+        PRODUCT_BUNDLE_IDENTIFIER: com.antonomelchuk.remotecontrol.browser-host
+        GENERATE_INFOPLIST_FILE: 'YES'
+        CREATE_INFOPLIST_SECTION_IN_BINARY: 'YES'
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Connect the Chrome YouTube bridge to your local Remote Control Agent.
 schemes:
   RemoteControlAgent:
     build:
@@ -78,3 +93,9 @@ schemes:
         RemoteControlAgent: all
     run:
       config: SignedDebug
+  RemoteControlBrowserHost:
+    build:
+      targets:
+        RemoteControlBrowserHost: all
+    run:
+      config: Debug

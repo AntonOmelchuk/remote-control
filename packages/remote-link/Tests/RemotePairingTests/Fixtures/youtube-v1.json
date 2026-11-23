@@ -1,0 +1,39 @@
+{
+  "state": {
+    "version": 1,
+    "type": "browserState",
+    "sequence": 0,
+    "snapshot": {
+      "availability": "ready",
+      "targetID": "2a435959-4bf7-4a93-9b4b-217a0e666941",
+      "videoID": "dQw4w9WgXcQ",
+      "title": "A quiet evening / Тихий вечір",
+      "paused": true,
+      "position": 125.75,
+      "duration": 3725.5
+    }
+  },
+  "command": {
+    "version": 1,
+    "type": "browserCommand",
+    "sequence": 0,
+    "requestID": "da9edcac-8fd3-4ff8-b4d8-4e827b9bde12",
+    "targetID": "2a435959-4bf7-4a93-9b4b-217a0e666941",
+    "paused": false
+  },
+  "status": {
+    "owner": "youtube-test",
+    "snapshot": {
+      "revision": 42,
+      "media": {
+        "availability": "ready",
+        "targetID": "2a435959-4bf7-4a93-9b4b-217a0e666941",
+        "videoID": "dQw4w9WgXcQ",
+        "title": "A quiet evening / Тихий вечір",
+        "paused": true,
+        "position": 125.75,
+        "duration": 3725.5
+      }
+    }
+  }
+}

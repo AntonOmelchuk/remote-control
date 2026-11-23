@@ -17,7 +17,7 @@ export const en = {
   'home.title': 'Your Mac.\nWithin reach.',
   'home.description': 'Settle in. Your favorite controls belong right here, in your hand.',
   'home.deviceTitle': 'Your Mac, one connection away',
-  'home.deviceDescription': 'Pair once, then open Mac audio.',
+  'home.deviceDescription': 'Pair once, then open your Mac remote.',
   'home.explore': 'Explore the remote',
   'home.footnote': 'Try the interactive preview. No Mac required.',
   'guide.eyebrow': 'MADE FOR YOUR OWN SPACE',
@@ -25,7 +25,7 @@ export const en = {
   'guide.description': 'Connect your devices locally and approve access on your Mac.',
   'guide.companionTitle': 'A companion on your Mac',
   'guide.companionDescription':
-    'The Mac companion handles system audio and publishes confirmed output state.',
+    'The Mac companion controls system audio and connects your selected YouTube tab.',
   'guide.networkTitle': 'One local network',
   'guide.networkDescription':
     'Your iPhone and Mac communicate over your local network, without a cloud account.',
@@ -33,7 +33,7 @@ export const en = {
   'guide.pairingDescription':
     'Start connections on the Mac, create a pairing code, scan it, and confirm the matching numbers on the Mac.',
   'guide.notice':
-    'Mac audio requires the updated development build. The preview works without a connection.',
+    'Mac controls require the updated development build. The preview works without a connection.',
   'guide.tryPreview': 'Try the preview',
   'preview.deviceLabel': 'DEMO DEVICE',
   'preview.deviceName': 'Sample MacBook',
@@ -112,22 +112,22 @@ export const en = {
   'pairing.error':
     'Pairing could not be completed. Keep the Mac listener running, check local network permission and Wi-Fi, and create a fresh code if needed. You can verify saved access after a lost confirmation.',
   'pairing.savedNote':
-    'Saved access is not an active session. Start connections on the Mac, then open Mac audio or verify this access.',
+    'Saved access is not an active session. Start connections on the Mac, then open your Mac remote or verify this access.',
   'pairing.verify': 'Verify saved access',
   'pairing.forget': 'Forget this Mac',
   'pairing.cancel': 'Cancel',
   'pairing.scan': 'Pair with your Mac',
   'pairing.scope':
-    'Pairing saves access. Open Mac audio for real volume and mute controls. The preview uses sample data.',
-  'remoteAudio.navigation': 'Mac audio',
-  'remoteAudio.open': 'Control Mac audio',
+    'Pairing saves access. Open your Mac remote for real audio and selected YouTube controls. The preview uses sample data.',
+  'remoteAudio.navigation': 'Mac remote',
+  'remoteAudio.open': 'Control your Mac',
   'remoteAudio.eyebrow': 'CONNECTED TO YOUR SPACE',
-  'remoteAudio.title': 'Sound, within reach.',
+  'remoteAudio.title': 'Your Mac. Within reach.',
   'remoteAudio.description':
     'Start connections in the Mac menu, then use your saved access. Changes here affect your Mac.',
   'remoteAudio.buildRequired': 'Install the updated iOS development build to enable Mac audio.',
   'remoteAudio.connecting': 'Connecting to your Mac',
-  'remoteAudio.connected': 'Remote audio session active',
+  'remoteAudio.connected': 'Remote session active',
   'remoteAudio.disconnected':
     'Disconnected. Keep connections enabled on the Mac and check Wi-Fi. A command may have completed before the connection was lost. Reconnect to read the current state.',
   'remoteAudio.confirmed': 'Confirmed on your Mac',
@@ -144,7 +144,7 @@ export const en = {
   'remoteAudio.reconnect': 'Reconnect',
   'remoteAudio.disconnect': 'Disconnect',
   'remoteAudio.scope':
-    'Audio only. Playback, timers, brightness, and power controls remain planned. The preview stays separate.',
+    'Volume, mute, and selected YouTube playback. Timers, brightness, and power controls remain planned.',
   'remoteAudio.failure.invalidVolume': 'Choose a volume between 0% and 100%.',
   'remoteAudio.failure.noOutput': 'No audio output is available.',
   'remoteAudio.failure.outputChanged':
@@ -158,4 +158,27 @@ export const en = {
   'remoteAudio.adjusting': 'Release to apply on your Mac',
   'remoteAudio.silent': 'Silent · volume is 0%',
   'remoteAudio.applying': 'Applying on your Mac…',
+  'youtube.play': 'Play YouTube on your Mac',
+  'youtube.pause': 'Pause YouTube on your Mac',
+  'youtube.playing': 'Playing',
+  'youtube.paused': 'Paused',
+  'youtube.live': 'Live / unknown duration',
+  'youtube.confirmed': 'Confirmed by the selected Chrome tab',
+  'youtube.buildRequired': 'Install the updated iOS development build to enable YouTube controls.',
+  'youtube.state.ready': 'Ready',
+  'youtube.state.advertisement':
+    'An advertisement is playing. Controls will return with the video.',
+  'youtube.state.unavailable':
+    'Open a YouTube watch page in Chrome, then select it from the Remote Control extension.',
+  'youtube.state.disconnected': 'Enable YouTube in the Mac menu and connect the Chrome extension.',
+  'youtube.state.stale':
+    'The selected tab stopped reporting. Open it in Chrome or select it again.',
+  'youtube.failure.bridgeUnavailable':
+    'The Chrome connection is unavailable. Reconnect the extension.',
+  'youtube.failure.targetChanged':
+    'The video changed. Review the current video before trying again.',
+  'youtube.failure.notReady': 'This video is not ready for playback control.',
+  'youtube.failure.blocked':
+    'Chrome blocked playback. Play the video once in Chrome, then try again.',
+  'youtube.failure.timedOut': 'Playback was not confirmed. Check Chrome before trying again.',
 } as const;

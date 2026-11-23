@@ -7,6 +7,11 @@ public final class RemoteLinkModule: Module {
     public func definition() -> ModuleDefinition {
         Name("RemoteLink")
         Constant("audioAPIVersion") { 1 }
+        Constant("mediaAPIVersion") { 1 }
+        AsyncFunction("setPlayback") {
+            [audio] (owner: String, targetID: String, paused: Bool) async throws -> String in
+            try await audio.setPlayback(owner: owner, targetID: targetID, paused: paused)
+        }
         AsyncFunction("connectAudio") { [audio] (owner: String) async throws -> String in
             try await audio.connect(owner: owner)
         }

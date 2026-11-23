@@ -21,6 +21,10 @@ struct PairingApproval {
 @Observable
 @MainActor
 final class PairingController {
+    let media = YouTubeService()
+    private let browser = BrowserBridgeAccess()
+    var browserEnabled: Bool { browser.enabled }
+    var browserFailed: Bool { browser.failed }
     private(set) var invitation: PairingInvitation?
     private(set) var approval: PairingApproval?
     private(set) var devices: [PairedPhone] = []
@@ -51,6 +55,8 @@ final class PairingController {
         var closing = false
         var deviceID: UUID?
         var audioReady = false
+        var browserGate: BrowserBridgeGate?
+        var sendingBrowser = false
         var audioGate: RemoteAudioGate?
         var action: Task<Void, Never>?
         var sendingAudio = false
@@ -60,7 +66,7 @@ final class PairingController {
     }
 
     init(audio: AudioOutputService) {
-        self.audio = RemoteAudioBroker(service: audio)
+        self.audio = RemoteAudioBroker(service: audio, media: media)
         self.audio.onChange = { [weak self] snapshot in self?.broadcast(snapshot) }
     }
 
@@ -178,6 +184,7 @@ final class PairingController {
     }
 
     func stop() {
+        disableBrowser()
         expiry?.cancel()
         expiry = nil
         listener?.cancel()
@@ -282,7 +289,7 @@ final class PairingController {
     }
 
     private func accept(_ connection: NWConnection) {
-        guard running, peers.count < 3 else {
+        guard running, peers.count < 4 else {
             connection.cancel()
             return
         }
@@ -317,7 +324,9 @@ final class PairingController {
                     return
                 }
                 do {
-                    if self.peers[id]?.audioGate != nil {
+                    if self.peers[id]?.browserGate != nil {
+                        try self.handleBrowser(BrowserBridgeFrame.decode(data), from: id)
+                    } else if self.peers[id]?.audioGate != nil {
                         try self.handleAudio(RemoteAudioFrame.decode(data), from: id)
                     } else {
                         try self.handle(PairingFrame.decode(data), from: id)
@@ -371,6 +380,24 @@ final class PairingController {
             } catch {
                 reject(id, request: message.requestID, reason: .storage)
             }
+        case .attachBrowser:
+            guard peer.requestID == nil, browser.accepts(message.token), !media.connected else {
+                reject(id, request: message.requestID, reason: .rejected)
+                return
+            }
+            peer.requestID = message.requestID
+            peer.browserGate = BrowserBridgeGate(now: .now)
+            peers[id] = peer
+            guard
+                media.attach(
+                    id: id, send: { [weak self] frame in self?.sendBrowser(frame, to: id) ?? false }
+                )
+            else {
+                close(id)
+                return
+            }
+            resetAudioTimeout(id)
+            send(PairingFrame(.browserAttached, requestID: message.requestID), to: id)
         case .authenticate, .openAudio:
             guard peer.requestID == nil, let deviceID = message.deviceID, let token = message.token,
                 let bytes = try? PairingEncoding.decodeBase64URL(token), bytes.count == 32,
@@ -410,6 +437,51 @@ final class PairingController {
         }
     }
 
+    func enableBrowser() {
+        guard running, !browser.enabled, let host = listeningHost,
+            let port = listener?.port?.rawValue, let identity
+        else { return }
+        browser.enable(host: host, port: port, fingerprint: identity.fingerprint)
+    }
+
+    func disableBrowser() {
+        browser.disable()
+        for id in Array(peers.keys) where peers[id]?.browserGate != nil { close(id) }
+    }
+
+    private func handleBrowser(_ frame: BrowserBridgeFrame, from id: UUID) throws {
+        guard browser.enabled, var gate = peers[id]?.browserGate else {
+            throw PairingFailure.rejected
+        }
+        try gate.accept(frame, now: .now)
+        peers[id]?.browserGate = gate
+        resetAudioTimeout(id)
+        media.receive(frame, from: id)
+        if frame.type == .browserHeartbeat {
+            _ = sendBrowser(BrowserBridgeFrame(.browserHeartbeat), to: id)
+        }
+    }
+
+    private func sendBrowser(_ frame: BrowserBridgeFrame, to id: UUID) -> Bool {
+        guard let peer = peers[id], peer.browserGate != nil, !peer.sendingBrowser,
+            let data = try? frame.encoded()
+        else { return false }
+        peers[id]?.sendingBrowser = true
+        let context = NWConnection.ContentContext(
+            identifier: "browser-command",
+            metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
+        peer.connection.send(
+            content: data, contentContext: context, isComplete: true,
+            completion: .contentProcessed { [weak self] error in
+                Task { @MainActor in
+                    guard let self, self.peers[id] != nil else { return }
+                    self.peers[id]?.sendingBrowser = false
+                    if error != nil { self.close(id) }
+                }
+            })
+        return true
+    }
+
     private func handleAudio(_ frame: RemoteAudioFrame, from id: UUID) throws {
         guard var peer = peers[id], let deviceID = peer.deviceID,
             devices.contains(where: { $0.id == deviceID }), peer.action == nil,
@@ -423,7 +495,7 @@ final class PairingController {
         peers[id]?.action = Task { [weak self] in
             guard let self else { return }
             do {
-                let (snapshot, failure) = try await self.audio.execute(frame)
+                let (snapshot, failure, mediaFailure) = try await self.audio.execute(frame)
                 guard self.peers[id]?.deviceID == deviceID, !Task.isCancelled else { return }
                 self.peers[id]?.action = nil
                 var result = RemoteAudioFrame(
@@ -431,6 +503,7 @@ final class PairingController {
                 result.sequence = frame.sequence
                 result.snapshot = snapshot
                 result.failure = failure
+                result.mediaFailure = mediaFailure
                 self.sendAudio(result, to: id)
             } catch { self.close(id) }
         }
@@ -524,6 +597,7 @@ final class PairingController {
     private func close(_ id: UUID) {
         guard let peer = peers.removeValue(forKey: id) else { return }
         activeDeviceIDs = Set(peers.values.filter(\.audioReady).compactMap(\.deviceID))
+        if peer.browserGate != nil { media.detach(id: id) }
         peer.timeout.cancel()
         peer.action?.cancel()
         peer.connection.stateUpdateHandler = nil

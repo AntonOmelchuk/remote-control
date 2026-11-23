@@ -6,7 +6,7 @@ Prepared against `main` at `74b1da6` on November 22, 2026. The preceding secure-
 
 Implemented in source: a persistent authenticated WSS session, initial state snapshot, pushed changes, absolute volume/mute commands, independent capabilities, output-identity validation, revocation, bounded queues, heartbeat/deadlines, and explicit reconnect. Also included: separate Mac connection/start and pairing actions, saved-versus-active device labels, and stable Mute/Refresh presentation in the local Mac card.
 
-Implementation-workspace validation passed formatting, ESLint, TypeScript, 23 mobile tests, and 42 portable Swift tests (17 core and 25 protocol tests). Expo also produced the iOS JavaScript/Hermes bundle successfully (1,219 modules); this is not a native Apple compilation result. The three Apple crypto tests are excluded on Linux; the maintainer passed the complete 45-test suite on the Mac. The maintainer subsequently passed the native Mac check (45 Swift tests and Debug build), launched the signed Agent, rebuilt/launched the physical iOS app, and verified volume/mute, external-state synchronization, and use with the Mac panel closed. The maintainer also reported the JavaScript-only slider/zero-volume follow-up working, verified Stop/Start recovery after reopening the remote route, and confirmed active-session revocation, rejected reconnect, and successful re-pairing. Current feature CI, final mobile checks after the UI follow-up, and the remaining device/failure matrix are pending.
+Implementation-workspace validation passed formatting, ESLint, TypeScript, 23 mobile tests, and 42 portable Swift tests (17 core and 25 protocol tests). Expo also produced the iOS JavaScript/Hermes bundle successfully (1,219 modules); this is not a native Apple compilation result. The three Apple crypto tests are excluded on Linux; the maintainer passed the complete 45-test suite on the Mac. The maintainer subsequently passed the native Mac check (45 Swift tests and Debug build), launched the signed Agent, rebuilt/launched the physical iOS app, and verified volume/mute, external-state synchronization, and use with the Mac panel closed. The maintainer also reported the JavaScript-only slider/zero-volume follow-up working, verified Stop/Start recovery after reopening the remote route, and confirmed active-session revocation, rejected reconnect, and successful re-pairing. The maintainer subsequently passed final `pnpm check` with all 23 mobile tests and both feature CI jobs; the feature was merged as `4d11376`. Broader device/failure coverage remains pending.
 
 ## Build and First Run
 
@@ -86,9 +86,9 @@ sequenceDiagram
 
 Pairing and remote audio use the same listener, port, identity, and TLS pin. `authenticate` retains its short verification-and-close behavior. `openAudio` requests a distinct persistent session. Before authentication, audio command frames are not accepted. The server generates a fresh session UUID after checking the saved device/token; the UUID is a correlation boundary, not a replacement for authentication.
 
-The audio allowlist contains only `setVolume`, `setMuted`, and `refreshAudio`. Volume is an absolute finite scalar in `0...1`; mute is an absolute boolean. Each command carries the session ID, a request UUID, and the next sequence number. Writes also require the current opaque output token. Unknown actions/fields, unsupported versions, unexpected argument combinations, binary frames, mismatched sessions, duplicate/out-of-order sequences, or excessive rates close the connection before dispatch.
+The original audio allowlist contains `setVolume`, `setMuted`, and `refreshAudio`. The later [YouTube increment](youtube-control.md) adds target-bound absolute `setPlayback` to the same authenticated foreground session. Volume is an absolute finite scalar in `0...1`; mute is an absolute boolean. Each command carries the session ID, a request UUID, and the next sequence number. Writes also require the current opaque output token. Unknown actions/fields, unsupported versions, unexpected argument combinations, binary frames, mismatched sessions, duplicate/out-of-order sequences, or excessive rates close the connection before dispatch.
 
-The rate gate allows a burst of ten requests and replenishes ten tokens per second using `ContinuousClock`. The existing global three-peer cap includes pairing and audio peers. No command is retried automatically. Queues are bounded: one command in flight, at most two queued replies, and one replaceable latest snapshot per Mac peer.
+The rate gate allows a burst of ten requests and replenishes ten tokens per second using `ContinuousClock`. The audio baseline used a global three-peer cap. The selected-YouTube increment raises the total to four to allow one browser peer; see [YouTube control](youtube-control.md). No command is retried automatically. Queues are bounded: one command in flight, at most two queued replies, and one replaceable latest snapshot per Mac peer.
 
 ## Confirmed State and Hardware Safety
 
@@ -158,7 +158,7 @@ The UI follow-up result is a maintainer-reported smoke check, not an instrumente
 
 ### Remaining Validation
 
-- Run final `pnpm check` with the UI follow-up's 23 tests on the maintainer's Mac, then observe both CI jobs for this feature.
+- Completed before merge: final `pnpm check` passed all 23 mobile tests and both feature CI jobs passed.
 - Check VoiceOver actions, keyboard use, large text, both languages/themes, and the Mac Mute/Refresh button appearance explicitly.
 - Switch outputs during a drag or command; cover unsupported/read-only controls and additional audio devices.
 - Exercise Agent quit/relaunch, Wi-Fi loss, phone lock/background, and a lost pending-command reply. Confirm fresh state and no automatic write replay.
@@ -166,7 +166,7 @@ The UI follow-up result is a maintainer-reported smoke check, not an instrumente
 
 ## Remaining Boundaries
 
-Discovery/address relocation, media playback, browser integration, arbitrary-duration timers, brightness, touchpad, and power commands remain separate milestones. Permissions for one action category must not imply permission to execute another. This feature is an audio-only contract and has not undergone a security audit or broad device/OS compatibility test.
+Discovery/address relocation, arbitrary-duration timers, brightness, touchpad and power remain separate milestones. Selected media/browser integration is covered by the subsequent [YouTube increment](youtube-control.md). Permissions for one action category must not imply permission to execute another. This feature is an audio-only contract and has not undergone a security audit or broad device/OS compatibility test.
 
 ## Slider and Zero-volume Follow-up
 

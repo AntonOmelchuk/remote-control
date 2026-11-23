@@ -13,16 +13,16 @@ ifneq ($(strip $(DEVELOPMENT_TEAM)),)
 SIGNING_ARGUMENTS := DEVELOPMENT_TEAM="$(DEVELOPMENT_TEAM)"
 endif
 
-.PHONY: generate format lint test build check development run
+.PHONY: generate format lint test build check development run browser-host install-browser-host
 
 generate:
 	xcodegen generate --spec project.yml
 
 format:
-	xcrun swift-format format --configuration .swift-format --in-place --recursive Sources $(CORE_PACKAGE)/Sources $(CORE_PACKAGE)/Tests $(CORE_PACKAGE)/Package.swift $(LINK_PACKAGE)/Sources $(LINK_PACKAGE)/Tests $(LINK_PACKAGE)/apple $(LINK_PACKAGE)/Package.swift
+	xcrun swift-format format --configuration .swift-format --in-place --recursive Sources BrowserHost $(CORE_PACKAGE)/Sources $(CORE_PACKAGE)/Tests $(CORE_PACKAGE)/Package.swift $(LINK_PACKAGE)/Sources $(LINK_PACKAGE)/Tests $(LINK_PACKAGE)/apple $(LINK_PACKAGE)/Package.swift
 
 lint:
-	xcrun swift-format lint --configuration .swift-format --strict --recursive Sources $(CORE_PACKAGE)/Sources $(CORE_PACKAGE)/Tests $(CORE_PACKAGE)/Package.swift $(LINK_PACKAGE)/Sources $(LINK_PACKAGE)/Tests $(LINK_PACKAGE)/apple $(LINK_PACKAGE)/Package.swift
+	xcrun swift-format lint --configuration .swift-format --strict --recursive Sources BrowserHost $(CORE_PACKAGE)/Sources $(CORE_PACKAGE)/Tests $(CORE_PACKAGE)/Package.swift $(LINK_PACKAGE)/Sources $(LINK_PACKAGE)/Tests $(LINK_PACKAGE)/apple $(LINK_PACKAGE)/Package.swift
 
 test:
 	xcrun swift test --package-path "$(CORE_PACKAGE)" -Xswiftc -warnings-as-errors
@@ -33,7 +33,7 @@ build: generate
 		-configuration Debug -destination 'platform=macOS' \
 		-derivedDataPath "$(DERIVED_DATA)" build
 
-check: lint test build
+check: lint test build browser-host
 
 development: generate
 	@test -n "$(DEVELOPMENT_TEAM)" || test -f Signing.local.xcconfig || { \
@@ -49,3 +49,12 @@ development: generate
 
 run: development
 	open "$(DEVELOPMENT_APP)"
+
+browser-host: generate
+	xcodebuild -project "$(PROJECT)" -scheme RemoteControlBrowserHost \
+		-configuration Debug -destination 'platform=macOS' \
+		-derivedDataPath "$(DERIVED_DATA)" build
+
+install-browser-host: browser-host
+	codesign --verify --strict "$(DERIVED_DATA)/Build/Products/Debug/RemoteControlBrowserHost"
+	node scripts/install-browser-host.mjs "$(DERIVED_DATA)/Build/Products/Debug/RemoteControlBrowserHost"

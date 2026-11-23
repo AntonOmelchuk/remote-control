@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extensionName__",
+  "description": "__MSG_extensionDescription__",
+  "version": "0.1.0",
+  "minimum_chrome_version": "120",
+  "default_locale": "en",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArjdgq91xLO5SB3FRxJh4e9fMKg/rJdG5o6WdxPTSaYrqwj9HAoXd/InqKXrpufI66Qzb1YkhJONn4/WDxzgU9P9PtU58aSFZYC73wKcztAjmOy4ScytFqCBxOcMAQU7pq7hiTq/kO/n9+7AeItP+XyqAUCzDektxtIZPd/qU8oyLi7GtImHtK7pnhG0xKH1tzNNCNof/uBBAzaSCZkY57o2FHVSyo64STnYtexgIy5cT/d9VpAZCjJcm454MUPecEAnHUG3Mg4KklFtUSGlcMir7Zm/qd+aZlpqb1uXNLa0uV7sC9cFzJuv3kfazYJWXUSU0HIRpByWWNK4b9k6XCwIDAQAB",
+  "permissions": ["nativeMessaging"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "__MSG_extensionName__"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false,
+      "world": "ISOLATED"
+    }
+  ],
+  "incognito": "not_allowed"
+}

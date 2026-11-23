@@ -31,14 +31,20 @@ public struct RemoteAudioSnapshot: Codable, Equatable, Sendable {
     public let revision: UInt64
     public let output: RemoteAudioOutput?
     public let failure: RemoteAudioFailure?
+    public let media: YouTubeSnapshot?
 
-    public init(revision: UInt64, output: RemoteAudioOutput?, failure: RemoteAudioFailure?) {
+    public init(
+        revision: UInt64, output: RemoteAudioOutput?, failure: RemoteAudioFailure?,
+        media: YouTubeSnapshot? = nil
+    ) {
         self.revision = revision
         self.output = output
         self.failure = failure
+        self.media = media
     }
 
     public func validate() throws {
+        try media?.validate()
         // The Expo facade exposes JSON numbers, so revisions must remain exactly representable.
         guard revision <= 9_007_199_254_740_991, output == nil || failure == nil else {
             throw PairingFailure.protocolError
@@ -56,10 +62,10 @@ public struct RemoteAudioSnapshot: Codable, Equatable, Sendable {
     }
 }
 
-/// Separate allowlist from onboarding. No media, input, power, or shell actions exist here.
+/// Foreground remote allowlist, separate from onboarding. No input, power, or shell actions exist here.
 public struct RemoteAudioFrame: Codable, Sendable {
     public enum Kind: String, Codable, Sendable {
-        case audioWelcome, audioUpdate, audioResult, setVolume, setMuted, refreshAudio
+        case audioWelcome, audioUpdate, audioResult, setVolume, setMuted, refreshAudio, setPlayback
     }
     public var version = 1
     public var type: Kind
@@ -68,6 +74,9 @@ public struct RemoteAudioFrame: Codable, Sendable {
     public var sequence: UInt64 = 0
     public var outputID: UUID?
     public var volume: Double?
+    public var targetID: UUID?
+    public var paused: Bool?
+    public var mediaFailure: MediaFailure?
     public var muted: Bool?
     public var snapshot: RemoteAudioSnapshot?
     public var failure: RemoteAudioFailure?
@@ -89,7 +98,7 @@ public struct RemoteAudioFrame: Codable, Sendable {
         do {
             let allowed: Set<String> = [
                 "version", "type", "requestID", "sessionID", "sequence", "outputID",
-                "volume", "muted", "snapshot", "failure",
+                "volume", "muted", "snapshot", "failure", "targetID", "paused", "mediaFailure",
             ]
             guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                 Set(object.keys).isSubset(of: allowed)
@@ -102,19 +111,26 @@ public struct RemoteAudioFrame: Codable, Sendable {
 
     public func validateCommand() throws {
         guard version == 1, sequence > 0, sequence <= 9_007_199_254_740_991,
-            snapshot == nil, failure == nil
+            snapshot == nil, failure == nil, mediaFailure == nil
         else { throw PairingFailure.protocolError }
         switch type {
         case .setVolume:
             guard outputID != nil, let volume, volume.isFinite, (0...1).contains(volume),
-                muted == nil
+                muted == nil, targetID == nil, paused == nil
             else { throw PairingFailure.protocolError }
         case .setMuted:
-            guard outputID != nil, muted != nil, volume == nil else {
+            guard outputID != nil, muted != nil, volume == nil, targetID == nil, paused == nil
+            else {
                 throw PairingFailure.protocolError
             }
         case .refreshAudio:
-            guard outputID == nil, volume == nil, muted == nil else {
+            guard outputID == nil, volume == nil, muted == nil, targetID == nil, paused == nil
+            else {
+                throw PairingFailure.protocolError
+            }
+        case .setPlayback:
+            guard targetID != nil, paused != nil, outputID == nil, volume == nil, muted == nil
+            else {
                 throw PairingFailure.protocolError
             }
         default: throw PairingFailure.protocolError
@@ -122,13 +138,17 @@ public struct RemoteAudioFrame: Codable, Sendable {
     }
 
     public func validateServerFrame() throws {
-        guard version == 1, outputID == nil, volume == nil, muted == nil, let snapshot else {
+        guard version == 1, outputID == nil, volume == nil, muted == nil, targetID == nil,
+            paused == nil, let snapshot
+        else {
             throw PairingFailure.protocolError
         }
         try snapshot.validate()
         switch type {
         case .audioWelcome, .audioUpdate:
-            guard sequence == 0, failure == nil else { throw PairingFailure.protocolError }
+            guard sequence == 0, failure == nil, mediaFailure == nil else {
+                throw PairingFailure.protocolError
+            }
         case .audioResult:
             guard sequence > 0, sequence <= 9_007_199_254_740_991 else {
                 throw PairingFailure.protocolError
@@ -142,25 +162,19 @@ public struct RemoteAudioFrame: Codable, Sendable {
 public struct RemoteAudioGate: Sendable {
     public let sessionID: UUID
     private var nextSequence: UInt64 = 1
-    private var tokens = 10.0
-    private var last: ContinuousClock.Instant
+    private var budget: RequestBudget
 
     public init(sessionID: UUID, now: ContinuousClock.Instant) {
         self.sessionID = sessionID
-        last = now
+        budget = RequestBudget(now: now)
     }
 
     public mutating func accept(_ frame: RemoteAudioFrame, now: ContinuousClock.Instant) throws {
         try frame.validateCommand()
-        guard frame.sessionID == sessionID, frame.sequence == nextSequence, now >= last else {
+        guard frame.sessionID == sessionID, frame.sequence == nextSequence else {
             throw PairingFailure.protocolError
         }
-        let elapsed = last.duration(to: now).components
-        let seconds = Double(elapsed.seconds) + Double(elapsed.attoseconds) / 1e18
-        let available = min(10, tokens + seconds * 10)
-        guard available >= 1 else { throw PairingFailure.busy }
-        tokens = available - 1
-        last = now
+        try budget.consume(now: now)
         nextSequence += 1
     }
 }

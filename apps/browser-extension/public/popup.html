@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>Remote Control</title>
+  </head>
+  <body>
+    <header>
+      <span class="mark" aria-hidden="true">◉</span
+      ><span data-i18n="extensionName">Remote Control</span>
+    </header>
+    <main>
+      <p class="eyebrow" data-i18n="eyebrow">YOUR VIDEO. WITHIN REACH.</p>
+      <h1 data-i18n="title">YouTube on your remote.</h1>
+      <p class="copy" data-i18n="description">
+        Start connections and enable YouTube on your Mac, then select the video tab.
+      </p>
+      <section class="card" aria-live="polite">
+        <p id="status" class="status"></p>
+        <p id="video" class="video"></p>
+        <p id="hint" class="hint"></p>
+      </section>
+      <button id="select" data-i18n="select">Use this YouTube tab</button>
+      <button id="connect" class="secondary" data-i18n="connect">Connect to Mac</button>
+      <button id="disconnect" class="text-button" data-i18n="disconnect">
+        Disconnect extension
+      </button>
+      <p class="footnote" data-i18n="privacy">
+        Only the selected YouTube video is shared. No browsing history or account data.
+      </p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

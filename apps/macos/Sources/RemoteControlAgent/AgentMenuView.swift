@@ -32,6 +32,8 @@ struct AgentMenuView: View {
 
                     AgentPairingCard(controller: pairing)
                         .tint(accent)
+                    BrowserControlCard(controller: pairing)
+                        .tint(accent)
                     AudioControlCard(service: audio)
                         .tint(accent)
                 }

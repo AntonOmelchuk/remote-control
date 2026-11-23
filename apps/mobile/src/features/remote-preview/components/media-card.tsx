@@ -6,7 +6,8 @@ import { IconButton } from '@/components/ui/icon-button';
 import type { ThemeColors } from '@/design-system/tokens';
 import { radii, spacing } from '@/design-system/tokens';
 import { useTheme, useThemeStyles } from '@/design-system/use-theme';
-import { formatPlaybackTime, previewMedia } from '@/features/remote-preview/model/preview-state';
+import { previewMedia } from '@/features/remote-preview/model/preview-state';
+import { formatPlaybackTime } from '@/shared/format-time';
 import { useAppTranslation } from '@/localization/use-app-translation';
 
 type MediaCardProps = {

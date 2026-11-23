@@ -8,6 +8,7 @@ private struct RemoteAudioStatus: Codable {
     let owner: String
     let snapshot: RemoteAudioSnapshot
     let commandFailure: RemoteAudioFailure?
+    let mediaFailure: MediaFailure?
 }
 
 /// One foreground session, one command in flight. Never retries a write after an ambiguous result.
@@ -20,6 +21,7 @@ actor RemoteAudioClient {
     private var socket: URLSessionWebSocketTask?
     private var snapshot: RemoteAudioSnapshot?
     private var commandFailure: RemoteAudioFailure?
+    private var mediaFailure: MediaFailure?
     private var nextSequence: UInt64 = 1
     private var receiver: Task<Void, Never>?
     private var heartbeat: Task<Void, Never>?
@@ -93,7 +95,8 @@ actor RemoteAudioClient {
         return String(
             decoding: try JSONEncoder().encode(
                 RemoteAudioStatus(
-                    owner: requested, snapshot: snapshot, commandFailure: commandFailure)),
+                    owner: requested, snapshot: snapshot, commandFailure: commandFailure,
+                    mediaFailure: mediaFailure)),
             as: UTF8.self)
     }
 
@@ -115,6 +118,15 @@ actor RemoteAudioClient {
         return try await submit(frame, owner: owner)
     }
 
+    func setPlayback(owner: String, targetID: String, paused: Bool) async throws -> String {
+        guard let id = UUID(uuidString: targetID) else { throw PairingFailure.protocolError }
+        try await waitForHeartbeat(owner: owner)
+        var frame = try command(.setPlayback, owner: owner)
+        frame.targetID = id
+        frame.paused = paused
+        return try await submit(frame, owner: owner)
+    }
+
     func disconnect(owner requested: String) {
         guard owner == requested else { return }
         cancelAll()
@@ -125,6 +137,7 @@ actor RemoteAudioClient {
         sessionID = nil
         snapshot = nil
         commandFailure = nil
+        mediaFailure = nil
         receiver?.cancel()
         heartbeat?.cancel()
         deadline?.cancel()
@@ -156,10 +169,13 @@ actor RemoteAudioClient {
         }
     }
 
-    private func statusWithFailure(_ failure: RemoteAudioFailure?, owner requested: String) throws
+    private func statusWithFailure(
+        _ failure: RemoteAudioFailure?, playbackFailure: MediaFailure?, owner requested: String
+    ) throws
         -> String
     {
         commandFailure = failure
+        mediaFailure = playbackFailure
         return try status(owner: requested)
     }
 
@@ -222,7 +238,10 @@ actor RemoteAudioClient {
                         operation.frame.sequence == frame.sequence
                     else { throw PairingFailure.protocolError }
                     let response = try statusWithFailure(
-                        operation.frame.type == .refreshAudio ? commandFailure : frame.failure,
+                        operation.frame.type == .setVolume || operation.frame.type == .setMuted
+                            ? frame.failure : commandFailure,
+                        playbackFailure: operation.frame.type == .setPlayback
+                            ? frame.mediaFailure : mediaFailure,
                         owner: requested)
                     pending = nil
                     deadline?.cancel()

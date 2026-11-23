@@ -3,6 +3,7 @@ import { ActivityIndicator } from 'react-native';
 
 import { ActionButton } from '@/components/ui/action-button';
 import { AppText } from '@/components/ui/app-text';
+import { YouTubeCard } from '@/features/youtube/components/youtube-card';
 import { Screen } from '@/components/ui/screen';
 import { useTheme } from '@/design-system/use-theme';
 import { useAppTranslation } from '@/localization/use-app-translation';
@@ -42,6 +43,15 @@ export function RemoteAudioScreen() {
         />
       ) : connected ? (
         <AppText>{t('remoteAudio.noOutput')}</AppText>
+      ) : null}
+      {connected ? (
+        <YouTubeCard
+          snapshot={remote.status?.snapshot.media ?? null}
+          failure={remote.status?.mediaFailure ?? null}
+          available={remote.mediaAvailable}
+          writing={remote.writing}
+          onSetPaused={remote.setPlayback}
+        />
       ) : null}
       {failure ? (
         <AppText accessibilityRole="alert">{t(`remoteAudio.failure.${failure}`)}</AppText>
