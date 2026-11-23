@@ -2,6 +2,8 @@ import { requireOptionalNativeModule } from 'expo';
 
 type RemoteLinkModule = {
   readonly audioAPIVersion?: number;
+  readonly mediaAPIVersion?: number;
+  setPlayback(owner: string, targetID: string, paused: boolean): Promise<string>;
   connectAudio(owner: string): Promise<string>;
   audioStatus(owner: string): Promise<string>;
   setAudioVolume(owner: string, outputID: string, volume: number): Promise<string>;
@@ -19,3 +21,5 @@ type RemoteLinkModule = {
 export const remoteLink = requireOptionalNativeModule<RemoteLinkModule>('RemoteLink');
 
 export const remoteAudioAvailable = remoteLink?.audioAPIVersion === 1;
+
+export const remoteMediaAvailable = remoteLink?.mediaAPIVersion === 1;

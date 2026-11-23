@@ -1,0 +1,56 @@
+{
+  "extensionName": {
+    "message": "Remote Control"
+  },
+  "extensionDescription": {
+    "message": "Control one explicitly selected YouTube video from your paired iPhone."
+  },
+  "eyebrow": {
+    "message": "YOUR VIDEO. WITHIN REACH."
+  },
+  "title": {
+    "message": "YouTube on your remote."
+  },
+  "description": {
+    "message": "Start connections and enable YouTube on your Mac, then select the video tab."
+  },
+  "select": {
+    "message": "Use this YouTube tab"
+  },
+  "connect": {
+    "message": "Connect to Mac"
+  },
+  "disconnect": {
+    "message": "Disconnect extension"
+  },
+  "privacy": {
+    "message": "Only the selected YouTube video is shared. No browsing history or account data."
+  },
+  "connected": {
+    "message": "Mac bridge connected"
+  },
+  "connecting": {
+    "message": "Connecting to your Mac…"
+  },
+  "disconnected": {
+    "message": "Mac bridge disconnected"
+  },
+  "noVideo": {
+    "message": "No YouTube video selected"
+  },
+  "paused": {
+    "message": "Paused"
+  },
+  "playing": {
+    "message": "Playing"
+  },
+  "selectHint": {
+    "message": "Open a YouTube watch page and select it here."
+  },
+  "setupHint": {
+    "message": "Enable YouTube in the Mac Agent. Install the native host and reconnect here."
+  },
+  "selectError": {
+    "message": "Open a YouTube watch page, reload it after installing the extension, and try again."
+  }
+}

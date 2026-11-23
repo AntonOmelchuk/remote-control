@@ -775,6 +775,134 @@
           }
         }
       }
+    },
+    "YouTube in Chrome": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YouTube in Chrome"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YouTube у Chrome"
+          }
+        }
+      }
+    },
+    "Select one YouTube tab in the Chrome extension. Other tabs stay private.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select one YouTube tab in the Chrome extension. Other tabs stay private."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть одну вкладку YouTube в розширенні Chrome. Інші вкладки залишаються приватними."
+          }
+        }
+      }
+    },
+    "Chrome connected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chrome connected"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chrome підключено"
+          }
+        }
+      }
+    },
+    "Waiting for Chrome extension": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for Chrome extension"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очікуємо розширення Chrome"
+          }
+        }
+      }
+    },
+    "Disable YouTube": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disable YouTube"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вимкнути YouTube"
+          }
+        }
+      }
+    },
+    "Enable YouTube": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable YouTube"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увімкнути YouTube"
+          }
+        }
+      }
+    },
+    "Start connections to enable YouTube.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start connections to enable YouTube."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустіть з’єднання, щоб увімкнути YouTube."
+          }
+        }
+      }
+    },
+    "Could not enable the Chrome bridge. Check the local setup guide.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not enable the Chrome bridge. Check the local setup guide."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося підключити Chrome. Перевірте інструкцію локального налаштування."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

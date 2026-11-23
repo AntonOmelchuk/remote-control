@@ -1,3 +1,6 @@
+import { isMediaFailure, readYouTubeSnapshot } from '@remote-control/remote-link/media';
+import type { MediaFailure, YouTubeSnapshot } from '@remote-control/remote-link/media';
+
 export const audioFailures = [
   'invalidVolume',
   'noOutput',
@@ -17,6 +20,7 @@ export type AudioOutput = {
   canSetMute: boolean;
 };
 export type AudioSnapshot = {
+  media: YouTubeSnapshot | null;
   revision: number;
   output: AudioOutput | null;
   failure: AudioFailure | null;
@@ -25,6 +29,7 @@ export type AudioStatus = {
   owner: string;
   snapshot: AudioSnapshot;
   commandFailure: AudioFailure | null;
+  mediaFailure: MediaFailure | null;
 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const record = (value: unknown): value is Record<string, unknown> =>
@@ -43,7 +48,8 @@ export function readAudioStatus(text: string, owner: string): AudioStatus {
     !Number.isSafeInteger(snapshot.revision) ||
     (snapshot.revision as number) < 0 ||
     (snapshot.failure != null && !failure(snapshot.failure)) ||
-    (value.commandFailure != null && !failure(value.commandFailure))
+    (value.commandFailure != null && !failure(value.commandFailure)) ||
+    (value.mediaFailure != null && !isMediaFailure(value.mediaFailure))
   ) {
     throw new Error('Invalid audio state');
   }
@@ -84,11 +90,13 @@ export function readAudioStatus(text: string, owner: string): AudioStatus {
   return {
     owner,
     snapshot: {
+      media: snapshot.media == null ? null : readYouTubeSnapshot(snapshot.media),
       revision: snapshot.revision as number,
       output,
       failure: (snapshot.failure as AudioFailure | undefined) ?? null,
     },
     commandFailure: (value.commandFailure as AudioFailure | undefined) ?? null,
+    mediaFailure: (value.mediaFailure as MediaFailure | undefined) ?? null,
   };
 }
 

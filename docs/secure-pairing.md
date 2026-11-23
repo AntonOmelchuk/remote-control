@@ -78,7 +78,7 @@ Requests carry a protocol version, action, and UUID request ID. The pairing proo
 
 The Mac uses `ContinuousClock` instants, which keep advancing during system sleep, for the authoritative 120-second invitation deadline, including a fresh check at approval. Phone wall time is an early usability check, not the server's security boundary. One valid request reserves the invitation. Approval buttons carry the displayed request and connection IDs, so a stale button cannot approve a replacement request. Approval, rejection, cancellation, replacement, or expiration prevents reuse. Five invalid proofs close the invitation window.
 
-The selected private address and fixed port are supplied once through `NWParameters.requiredLocalEndpoint`. The listener is created with `NWListener(using:)`, without a second port override. The listener permits at most three outstanding connections. Each has a 60-second deadline, including handshake and approval. Text frames are limited to 4096 bytes. Unknown actions/versions, binary frames, malformed frames, incorrect request IDs, and invalid transitions are rejected or disconnected. At most ten paired devices are stored. No pairing action executes arbitrary commands, invokes a shell, or grants a power action.
+The selected private address and fixed port are supplied once through `NWParameters.requiredLocalEndpoint`. The listener is created with `NWListener(using:)`, without a second port override. The pairing baseline permitted three outstanding connections. The selected-YouTube increment uses a four-peer total, with at most one separate browser peer; see [YouTube control](youtube-control.md). Each has a 60-second deadline, including handshake and approval. Text frames are limited to 4096 bytes. Unknown actions/versions, binary frames, malformed frames, incorrect request IDs, and invalid transitions are rejected or disconnected. At most ten paired devices are stored. No pairing action executes arbitrary commands, invokes a shell, or grants a power action.
 
 ## Credential Storage and Failure Recovery
 
@@ -164,7 +164,7 @@ The final checks ran after the Keychain/signing, XML entitlement-output, and lis
 
 ## Remaining Validation
 
-- Completed after the recorded device checks: both pairing CI jobs passed before merge. Current remote-audio CI and its new device matrix remain pending.
+- Completed after the recorded device checks: both pairing CI jobs passed before merge. Remote-audio CI and the primary-device matrix subsequently passed before merge; broader device coverage remains pending.
 - Check permission prompts and text wrapping in both languages, light/dark appearance, keyboard use, and VoiceOver.
 - Manually reject a new pairing request, let an invitation expire, reuse an old code, and background/cancel during approval. Portable tests cover gate and input boundaries; the full UI/network paths remain separate checks.
 - Stop the listener and verify connection failure while local audio remains usable.

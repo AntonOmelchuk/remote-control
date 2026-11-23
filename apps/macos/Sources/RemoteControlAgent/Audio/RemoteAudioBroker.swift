@@ -6,13 +6,23 @@ import RemotePairing
 @MainActor
 final class RemoteAudioBroker {
     private let service: AudioOutputService
+    private let media: YouTubeService
+    private var audioRevision: UInt64?
+    private var revision: UInt64 = 0
     private var observation: Task<Void, Never>?
     private var outputID: AudioOutputID?
     private var outputToken = UUID()
     private var latest: RemoteAudioSnapshot?
     var onChange: ((RemoteAudioSnapshot) -> Void)?
 
-    init(service: AudioOutputService) { self.service = service }
+    init(service: AudioOutputService, media: YouTubeService) {
+        self.service = service
+        self.media = media
+        media.onChange = { [weak self] _ in
+            guard let self, let latest = self.latest else { return }
+            self.publish(output: latest.output, failure: latest.failure)
+        }
+    }
 
     func start() {
         guard observation == nil else { return }
@@ -28,6 +38,7 @@ final class RemoteAudioBroker {
         observation?.cancel()
         observation = nil
         latest = nil
+        audioRevision = nil
         outputID = nil
         outputToken = UUID()
     }
@@ -38,12 +49,21 @@ final class RemoteAudioBroker {
     }
 
     func execute(_ frame: RemoteAudioFrame) async throws -> (
-        RemoteAudioSnapshot, RemoteAudioFailure?
+        RemoteAudioSnapshot, RemoteAudioFailure?, MediaFailure?
     ) {
         try Task.checkCancellation()
-        if frame.type == .refreshAudio { return (await refresh(), nil) }
+        if frame.type == .refreshAudio { return (await refresh(), nil, nil) }
+        if frame.type == .setPlayback {
+            guard let target = frame.targetID, let paused = frame.paused else {
+                throw PairingFailure.protocolError
+            }
+            let failure = try await media.setPaused(paused, target: target)
+            let current: RemoteAudioSnapshot
+            if let latest { current = latest } else { current = await refresh() }
+            return (current, nil, failure)
+        }
         guard frame.outputID == outputToken, let expected = outputID else {
-            return (await refresh(), .outputChanged)
+            return (await refresh(), .outputChanged, nil)
         }
         let result: AudioCommandResult
         switch frame.type {
@@ -60,11 +80,12 @@ final class RemoteAudioBroker {
             latest
             ?? RemoteAudioSnapshot(
                 revision: result.update.revision, output: nil, failure: .hardwareFailure)
-        return (snapshot, result.failure.map(mapFailure))
+        return (snapshot, result.failure.map(mapFailure), nil)
     }
 
     private func apply(_ update: AudioUpdate) {
-        if let latest, update.revision <= latest.revision { return }
+        if let audioRevision, update.revision <= audioRevision { return }
+        audioRevision = update.revision
         let output: RemoteAudioOutput?
         let failure: RemoteAudioFailure?
         switch update.state {
@@ -90,8 +111,13 @@ final class RemoteAudioBroker {
             output = nil
             failure = mapFailure(value)
         }
+        publish(output: output, failure: failure)
+    }
+
+    private func publish(output: RemoteAudioOutput?, failure: RemoteAudioFailure?) {
+        revision += 1
         let snapshot = RemoteAudioSnapshot(
-            revision: update.revision, output: output, failure: failure)
+            revision: revision, output: output, failure: failure, media: media.snapshot)
         latest = snapshot
         onChange?(snapshot)
     }

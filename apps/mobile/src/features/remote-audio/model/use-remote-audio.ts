@@ -1,4 +1,8 @@
-import { remoteAudioAvailable, remoteLink } from '@remote-control/remote-link';
+import {
+  remoteAudioAvailable,
+  remoteMediaAvailable,
+  remoteLink,
+} from '@remote-control/remote-link';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { AppState } from 'react-native';
@@ -96,16 +100,13 @@ export function useRemoteAudio() {
   );
 
   const submit = useCallback(
-    async (outputID: string, volume: number | null, muted: boolean | null) => {
+    async (invoke: (api: NonNullable<typeof remoteLink>, owner: string) => Promise<string>) => {
       const owner = currentOwner.current;
       if (!owner || !remoteLink || busy.current || phase !== 'connected') return;
       busy.current = true;
       setWriting(true);
       try {
-        const result =
-          volume !== null
-            ? await remoteLink.setAudioVolume(owner, outputID, volume)
-            : await remoteLink.setAudioMuted(owner, outputID, muted === true);
+        const result = await invoke(remoteLink, owner);
         apply(result, owner);
       } catch {
         // The outcome may be unknown. Reconnect only by explicit user action and read a fresh snapshot.
@@ -120,15 +121,27 @@ export function useRemoteAudio() {
     [apply, disconnect, phase],
   );
   const setVolume = useCallback(
-    (outputID: string, volume: number) => submit(outputID, volume, null),
+    (outputID: string, volume: number) =>
+      submit((api, owner) => api.setAudioVolume(owner, outputID, volume)),
     [submit],
   );
   const setMuted = useCallback(
-    (outputID: string, muted: boolean) => submit(outputID, null, muted),
+    (outputID: string, muted: boolean) =>
+      submit((api, owner) => api.setAudioMuted(owner, outputID, muted)),
+    [submit],
+  );
+
+  const setPlayback = useCallback(
+    (targetID: string, paused: boolean) => {
+      if (!remoteMediaAvailable) return Promise.resolve();
+      return submit((api, owner) => api.setPlayback(owner, targetID, paused));
+    },
     [submit],
   );
 
   return {
+    mediaAvailable: remoteMediaAvailable,
+    setPlayback,
     available: remoteAudioAvailable,
     phase,
     status,

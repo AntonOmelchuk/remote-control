@@ -79,7 +79,3 @@ export function previewReducer(state: PreviewState, action: PreviewAction): Prev
 function unreachable(_action: never): never {
   throw new Error('Unknown remote preview action');
 }
-
-export function formatPlaybackTime(seconds: number): string {
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-}

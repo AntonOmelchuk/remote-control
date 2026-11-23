@@ -19,7 +19,7 @@ export const uk = {
   'home.title': 'Твій Mac.\nПід рукою.',
   'home.description': 'Влаштовуйся зручніше. Улюблені елементи керування — тепер у твоїй руці.',
   'home.deviceTitle': 'Твій Mac — на відстані підключення',
-  'home.deviceDescription': 'Створи пару та відкрий керування аудіо Mac.',
+  'home.deviceDescription': 'Створіть пару та відкрийте пульт Mac.',
   'home.explore': 'Спробувати пульт',
   'home.footnote': 'Інтерактивний огляд. Mac не потрібен.',
   'guide.eyebrow': 'ДЛЯ ТВОГО ВЛАСНОГО ПРОСТОРУ',
@@ -27,7 +27,7 @@ export const uk = {
   'guide.description': 'З’єднай пристрої локально та підтвердь доступ на Mac.',
   'guide.companionTitle': 'Помічник на твоєму Mac',
   'guide.companionDescription':
-    'Застосунок на Mac керує системним аудіо й передає підтверджений стан виходу.',
+    'Застосунок на Mac керує системним звуком і підключає вибрану вкладку YouTube.',
   'guide.networkTitle': 'Одна локальна мережа',
   'guide.networkDescription':
     'iPhone і Mac обмінюються даними в локальній мережі без хмарного акаунта.',
@@ -35,7 +35,7 @@ export const uk = {
   'guide.pairingDescription':
     'Увімкни підключення на Mac, створи QR-код, відскануй його та підтвердь однакові числа на Mac.',
   'guide.notice':
-    'Керування аудіо Mac потребує оновленої збірки для розробки. Preview працює без підключення.',
+    'Для керування Mac потрібна оновлена development-збірка. Демо працює без з’єднання.',
   'guide.tryPreview': 'Спробувати пульт',
   'preview.deviceLabel': 'ДЕМОПРИСТРІЙ',
   'preview.deviceName': 'Демо MacBook',
@@ -114,23 +114,23 @@ export const uk = {
   'pairing.error':
     'Не вдалося завершити сполучення. Залиш з’єднання на Mac увімкненим, перевір дозвіл локальної мережі й Wi-Fi та за потреби створи новий код. Після втрати підтвердження можна перевірити збережений доступ.',
   'pairing.savedNote':
-    'Збережений доступ — це ще не активний сеанс. Увімкни підключення на Mac та відкрий керування аудіо або перевір доступ.',
+    'Збережений доступ — це ще не активне з’єднання. Запустіть з’єднання на Mac та відкрийте пульт або перевірте доступ.',
   'pairing.verify': 'Перевірити збережений доступ',
   'pairing.forget': 'Забути цей Mac',
   'pairing.cancel': 'Скасувати',
   'pairing.scan': 'Сполучити з Mac',
   'pairing.scope':
-    'Створення пари зберігає доступ. Відкрий аудіо Mac для реальної зміни гучності та mute. Preview використовує демонстраційні дані.',
-  'remoteAudio.navigation': 'Аудіо Mac',
-  'remoteAudio.open': 'Керувати аудіо Mac',
+    'Створення пари зберігає доступ. Відкрийте пульт Mac для керування звуком і вибраним YouTube. Демо використовує зразкові дані.',
+  'remoteAudio.navigation': 'Пульт Mac',
+  'remoteAudio.open': 'Керувати Mac',
   'remoteAudio.eyebrow': 'ЗВУК У ТВОЄМУ ПРОСТОРІ',
-  'remoteAudio.title': 'Звук під рукою.',
+  'remoteAudio.title': 'Ваш Mac. Під рукою.',
   'remoteAudio.description':
     'Увімкни підключення в меню Mac та скористайся збереженим доступом. Зміни тут впливають на твій Mac.',
   'remoteAudio.buildRequired':
     'Установи оновлену збірку застосунку для розробки iOS, щоб керувати аудіо Mac.',
   'remoteAudio.connecting': 'Підключення до Mac',
-  'remoteAudio.connected': 'Сеанс керування аудіо активний',
+  'remoteAudio.connected': 'Дистанційне з’єднання активне',
   'remoteAudio.disconnected':
     'З’єднання втрачено. Перевір Wi-Fi та підключення на Mac. Команда могла виконатися до втрати зв’язку. Підключись знову, щоб отримати поточний стан.',
   'remoteAudio.confirmed': 'Підтверджено на Mac',
@@ -148,7 +148,7 @@ export const uk = {
   'remoteAudio.reconnect': 'Підключитися знову',
   'remoteAudio.disconnect': 'Від’єднатися',
   'remoteAudio.scope':
-    'Поки що лише аудіо. Відтворення, таймери, яскравість і живлення заплановані. Preview залишається окремим.',
+    'Гучність, звук і вибране відео YouTube. Таймери, яскравість та живлення — у планах.',
   'remoteAudio.failure.invalidVolume': 'Вибери гучність від 0% до 100%.',
   'remoteAudio.failure.noOutput': 'Немає доступного аудіовиходу.',
   'remoteAudio.failure.outputChanged':
@@ -162,4 +162,25 @@ export const uk = {
   'remoteAudio.adjusting': 'Відпусти, щоб застосувати на Mac',
   'remoteAudio.silent': 'Без звуку · гучність 0%',
   'remoteAudio.applying': 'Застосування на Mac…',
+  'youtube.play': 'Відтворити YouTube на Mac',
+  'youtube.pause': 'Призупинити YouTube на Mac',
+  'youtube.playing': 'Відтворюється',
+  'youtube.paused': 'На паузі',
+  'youtube.live': 'Наживо / тривалість невідома',
+  'youtube.confirmed': 'Підтверджено вибраною вкладкою Chrome',
+  'youtube.buildRequired': 'Встановіть оновлену development-збірку iOS для керування YouTube.',
+  'youtube.state.ready': 'Готово',
+  'youtube.state.advertisement': 'Відтворюється реклама. Керування повернеться разом із відео.',
+  'youtube.state.unavailable':
+    'Відкрийте відео YouTube у Chrome та виберіть цю вкладку в розширенні Remote Control.',
+  'youtube.state.disconnected': 'Увімкніть YouTube у меню Mac та підключіть розширення Chrome.',
+  'youtube.state.stale':
+    'Вибрана вкладка перестала надсилати стан. Відкрийте її в Chrome або виберіть знову.',
+  'youtube.failure.bridgeUnavailable':
+    'З’єднання з Chrome недоступне. Підключіть розширення знову.',
+  'youtube.failure.targetChanged': 'Відео змінилося. Перевірте поточне відео перед новою спробою.',
+  'youtube.failure.notReady': 'Це відео ще не готове до дистанційного керування.',
+  'youtube.failure.blocked':
+    'Chrome заблокував відтворення. Запустіть відео один раз у Chrome та повторіть спробу.',
+  'youtube.failure.timedOut': 'Відтворення не підтверджено. Перевірте Chrome перед новою спробою.',
 } as const satisfies { [Key in keyof typeof en]: string };

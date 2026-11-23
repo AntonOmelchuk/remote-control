@@ -1,0 +1,56 @@
+{
+  "extensionName": {
+    "message": "Remote Control"
+  },
+  "extensionDescription": {
+    "message": "Керування вибраним відео YouTube зі сполученого iPhone."
+  },
+  "eyebrow": {
+    "message": "ТВОЄ ВІДЕО ПІД РУКОЮ"
+  },
+  "title": {
+    "message": "YouTube на твоєму пульті."
+  },
+  "description": {
+    "message": "Увімкни підключення та YouTube на Mac, потім вибери вкладку з відео."
+  },
+  "select": {
+    "message": "Керувати цією вкладкою YouTube"
+  },
+  "connect": {
+    "message": "Підключитися до Mac"
+  },
+  "disconnect": {
+    "message": "Від’єднати розширення"
+  },
+  "privacy": {
+    "message": "Передається лише вибране відео YouTube. Без історії переглядів і даних акаунта."
+  },
+  "connected": {
+    "message": "Міст до Mac підключено"
+  },
+  "connecting": {
+    "message": "Підключення до Mac…"
+  },
+  "disconnected": {
+    "message": "Міст до Mac від’єднано"
+  },
+  "noVideo": {
+    "message": "Відео YouTube не вибрано"
+  },
+  "paused": {
+    "message": "Пауза"
+  },
+  "playing": {
+    "message": "Відтворення"
+  },
+  "selectHint": {
+    "message": "Відкрий сторінку відео YouTube та вибери її тут."
+  },
+  "setupHint": {
+    "message": "Увімкни YouTube у Mac Agent. Установи native host та підключись тут."
+  },
+  "selectError": {
+    "message": "Відкрий сторінку відео YouTube, онови її після встановлення розширення й спробуй ще раз."
+  }
+}
