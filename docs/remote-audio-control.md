@@ -175,3 +175,7 @@ The maintainer reported that the percentage did not follow a drag, and decreasin
 The maintainer reported this follow-up working. Future device checks should retain coverage of the held-drag number, release-to-apply, exact silence at zero using both controls, the silent icon, and increase from zero. If exact-zero readback remains audible, investigate the output's HAL zero/minimum-gain behavior rather than hiding it by rounding the display.
 
 If a newly added route is missing from TypeScript's generated route union, restart `expo start --dev-client` once to refresh the ignored route types before running `pnpm check`. Do not cast the route to bypass validation or hand-edit the generated declaration.
+
+## Timer Composition
+
+The legacy audio transport now also carries optional `selectionID` and timer state under the broker's increasing revision. Timer failures are independent of audio and playback failures. Phone route/background teardown closes the foreground session but does not cancel an accepted Mac schedule. Audio remains available when selected media disappears. See [Sleep timer](sleep-timer.md); timer native/device regression checks remain pending.

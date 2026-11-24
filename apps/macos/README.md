@@ -1,6 +1,6 @@
 # Remote Control macOS Agent
 
-**Current status:** pairing and audio passed the primary-device checks and both feature CI jobs before merge. Selected YouTube playback was verified on the primary Mac/iPhone on November 23: Pause/Play, browser-to-phone synchronization, changing videos in one selected tab, and audio control after closing that tab. The updated native apps launched after the iOS platform guard, and the UUID-casing fix passed 28 mobile and 14 extension tests. Final Mac checks after the guard, YouTube CI and broader failure/accessibility coverage remain pending. See [YouTube control](../../docs/youtube-control.md) for setup and recorded coverage.
+**Current status:** pairing and audio passed the primary-device checks and both feature CI jobs before merge. Selected YouTube playback was verified on the primary Mac/iPhone on November 23: Pause/Play, browser-to-phone synchronization, changing videos in one selected tab, and audio control after closing that tab. The updated native apps launched after the iOS platform guard, and the UUID-casing fix passed 28 mobile and 14 extension tests. Final Mac checks and both YouTube CI jobs subsequently passed before merge as `e92bec1`; broader failure/accessibility coverage remains pending. See [YouTube control](../../docs/youtube-control.md) for setup and recorded coverage.
 
 The native Mac companion for Remote Control. The application provides a SwiftUI menu-bar panel with local volume and mute controls, phone-connection status, English/Ukrainian copy, and an explicit Quit action.
 
@@ -94,3 +94,9 @@ See [macOS Agent Shell](../../docs/macos-agent-shell.md) for architecture, valid
 ## Chrome Bridge
 
 `BrowserHost/` is a separate executable target with no phone Keychain access. `Sources/RemoteControlAgent/Browser/` owns per-run enablement, selected media state and pending playback. Install the helper for the current user with `make -C apps/macos install-browser-host`; re-run it after helper source changes. Agent rebuilds do not replace the installed helper. See the [complete setup and security guide](../../docs/youtube-control.md).
+
+## Mac-Owned Sleep Timer
+
+The timer increment adds custom 1–720-minute scheduling on the Mac, a separate selected-document identity, stale-command protection and independent timer status. It pauses the current ready video in that document and continues after the phone session closes. The schedule is in memory only; the Mac must remain awake. Creator revocation, selection loss and connection shutdown cancel active timers. There is no power action or automatic replay after an uncertain result.
+
+Portable checks pass 25 core, 36 protocol, 34 mobile and 16 extension tests. These do not establish Apple SDK compilation or physical-device behavior. Updated native builds, helper installation, Chrome/iPhone acceptance and timer CI remain pending. Read the [sleep timer guide](../../docs/sleep-timer.md) for exact source ownership, security rules, coordinated upgrade steps and the pending acceptance matrix.

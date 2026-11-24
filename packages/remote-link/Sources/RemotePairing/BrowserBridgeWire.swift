@@ -10,6 +10,7 @@ public struct BrowserBridgeFrame: Codable, Sendable {
     public var sequence: UInt64 = 0
     public var requestID: UUID?
     public var targetID: UUID?
+    public var selectionID: UUID?
     public var paused: Bool?
     public var snapshot: YouTubeSnapshot?
     public var failure: MediaFailure?
@@ -28,9 +29,11 @@ public struct BrowserBridgeFrame: Codable, Sendable {
             else { throw PairingFailure.protocolError }
             try snapshot.validate()
         case .browserResult:
-            guard requestID != nil, snapshot == nil else { throw PairingFailure.protocolError }
+            guard requestID != nil, snapshot == nil, selectionID == nil else {
+                throw PairingFailure.protocolError
+            }
         case .browserHeartbeat:
-            guard requestID == nil, snapshot == nil, failure == nil else {
+            guard requestID == nil, snapshot == nil, failure == nil, selectionID == nil else {
                 throw PairingFailure.protocolError
             }
         default: throw PairingFailure.protocolError
@@ -38,7 +41,8 @@ public struct BrowserBridgeFrame: Codable, Sendable {
     }
 
     public func validateDownstream() throws {
-        guard version == 1, sequence == 0, snapshot == nil, failure == nil else {
+        guard version == 1, sequence == 0, snapshot == nil, failure == nil, selectionID == nil
+        else {
             throw PairingFailure.protocolError
         }
         switch type {
@@ -65,7 +69,7 @@ public struct BrowserBridgeFrame: Codable, Sendable {
         do {
             let keys: Set<String> = [
                 "version", "type", "sequence", "requestID", "targetID", "paused", "snapshot",
-                "failure",
+                "failure", "selectionID",
             ]
             guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                 Set(object.keys).isSubset(of: keys)

@@ -6,8 +6,12 @@ import RemotePairing
 @MainActor
 final class YouTubeService {
     private(set) var snapshot = YouTubeSnapshot(availability: .disconnected)
+    private(set) var selectionID: UUID?
     var connected: Bool { bridgeID != nil }
-    @ObservationIgnored var onChange: ((YouTubeSnapshot) -> Void)?
+    var canControl: Bool {
+        connected && snapshot.availability == .ready && lastState.duration(to: .now) <= .seconds(5)
+    }
+    @ObservationIgnored var onChange: (() -> Void)?
     @ObservationIgnored private var bridgeID: UUID?
     @ObservationIgnored private var send: ((BrowserBridgeFrame) -> Bool)?
     @ObservationIgnored private var monitor: Task<Void, Never>?
@@ -33,7 +37,8 @@ final class YouTubeService {
                 do { try await Task.sleep(for: .seconds(1)) } catch { return }
                 guard let self, self.bridgeID == id else { return }
                 if self.lastState.duration(to: .now) > .seconds(5) {
-                    self.publish(YouTubeSnapshot(availability: .stale))
+                    self.publish(
+                        YouTubeSnapshot(availability: .stale), selectionID: self.selectionID)
                     self.finish(.notReady)
                 }
             }
@@ -57,7 +62,7 @@ final class YouTubeService {
         case .browserState:
             guard let snapshot = frame.snapshot else { return }
             lastState = .now
-            publish(snapshot)
+            publish(snapshot, selectionID: frame.selectionID)
             if let pending, pending.target != snapshot.targetID { finish(.targetChanged) }
         case .browserResult:
             guard let pending, pending.id == frame.requestID else { return }
@@ -80,7 +85,7 @@ final class YouTubeService {
         try Task.checkCancellation()
         guard bridgeID != nil else { return .bridgeUnavailable }
         guard snapshot.targetID == target else { return .targetChanged }
-        guard snapshot.availability == .ready, pending == nil else { return .notReady }
+        guard canControl, pending == nil else { return .notReady }
         let id = UUID()
         return await withTaskCancellationHandler {
             await withCheckedContinuation { continuation in
@@ -110,10 +115,11 @@ final class YouTubeService {
         }
     }
 
-    private func publish(_ value: YouTubeSnapshot) {
-        guard snapshot != value else { return }
+    private func publish(_ value: YouTubeSnapshot, selectionID: UUID? = nil) {
+        guard snapshot != value || self.selectionID != selectionID else { return }
+        self.selectionID = selectionID
         snapshot = value
-        onChange?(value)
+        onChange?()
     }
 
     private func finish(_ failure: MediaFailure?) {

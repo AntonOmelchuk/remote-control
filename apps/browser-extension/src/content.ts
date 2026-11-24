@@ -1,15 +1,16 @@
 import { packet, readPacket } from './protocol.ts';
 import { YouTubeAdapter } from './youtube-adapter.ts';
 
-const adapter = new YouTubeAdapter(document, () => location.href);
+let adapter = new YouTubeAdapter(document, () => location.href);
 let port: chrome.runtime.Port | null = null;
+let selectionID: string | null = null;
 let interval: ReturnType<typeof setInterval> | null = null;
 let busy = false;
 const seen: string[] = [];
 function publish() {
   if (!port) return;
   try {
-    port.postMessage({ ...packet('browserState'), snapshot: adapter.read() });
+    port.postMessage({ ...packet('browserState'), snapshot: adapter.read(), selectionID });
   } catch {
     stop();
   }
@@ -19,10 +20,13 @@ function stop() {
   interval = null;
   const old = port;
   port = null;
+  selectionID = null;
   old?.disconnect();
 }
 function start() {
   stop();
+  selectionID = crypto.randomUUID();
+  adapter = new YouTubeAdapter(document, () => location.href);
   seen.length = 0;
   const selected = chrome.runtime.connect({ name: 'remote-control-youtube-v1' });
   port = selected;

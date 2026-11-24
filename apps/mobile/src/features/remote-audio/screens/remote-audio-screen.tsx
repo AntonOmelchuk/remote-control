@@ -1,3 +1,4 @@
+import { SleepTimerCard } from '@/features/sleep-timer/components/sleep-timer-card';
 import { router } from 'expo-router';
 import { ActivityIndicator } from 'react-native';
 
@@ -51,6 +52,18 @@ export function RemoteAudioScreen() {
           available={remote.mediaAvailable}
           writing={remote.writing}
           onSetPaused={remote.setPlayback}
+        />
+      ) : null}
+      {connected ? (
+        <SleepTimerCard
+          timer={remote.status?.snapshot.timer ?? null}
+          selectionID={remote.status?.snapshot.selectionID ?? null}
+          playerReady={remote.status?.snapshot.media?.availability === 'ready'}
+          available={remote.timerAvailable}
+          writing={remote.writing}
+          failure={remote.status?.timerFailure ?? null}
+          onStart={remote.startSleepTimer}
+          onCancel={remote.cancelSleepTimer}
         />
       ) : null}
       {failure ? (

@@ -12,6 +12,7 @@ export type BrowserPacket = {
   sequence: 0;
   requestID?: string;
   targetID?: string;
+  selectionID?: string | null;
   paused?: boolean;
   snapshot?: YouTubeSnapshot;
   failure?: MediaFailure;
@@ -36,15 +37,21 @@ export function readPacket(value: unknown, direction: 'upstream' | 'downstream')
           'targetID',
           'paused',
           'snapshot',
+          'selectionID',
           'failure',
         ].includes(key),
     )
   )
     throw new Error('Invalid browser packet');
   const result = packet(value.type as BrowserPacket['type']);
+  if (value.type !== 'browserState' && value.selectionID != null)
+    throw new Error('Unexpected selection');
   if (direction === 'upstream') {
     if (value.targetID != null || value.paused != null) throw new Error('Invalid upstream command');
     if (value.type === 'browserState' && value.requestID == null && value.failure == null) {
+      if (value.selectionID != null && !isUUID(value.selectionID))
+        throw new Error('Invalid selection');
+      if (isUUID(value.selectionID)) result.selectionID = value.selectionID.toLowerCase();
       result.snapshot = readYouTubeSnapshot(value.snapshot);
       if (
         result.snapshot.availability === 'disconnected' ||

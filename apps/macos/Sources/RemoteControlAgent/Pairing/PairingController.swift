@@ -25,6 +25,7 @@ final class PairingController {
     private let browser = BrowserBridgeAccess()
     var browserEnabled: Bool { browser.enabled }
     var browserFailed: Bool { browser.failed }
+    var sleepTimer: SleepTimerController { audio.timer }
     private(set) var invitation: PairingInvitation?
     private(set) var approval: PairingApproval?
     private(set) var devices: [PairedPhone] = []
@@ -184,6 +185,7 @@ final class PairingController {
     }
 
     func stop() {
+        audio.timer.stop()
         disableBrowser()
         expiry?.cancel()
         expiry = nil
@@ -243,6 +245,7 @@ final class PairingController {
             let next = devices.filter { $0.id != id }
             try vault.save(JSONEncoder().encode(next), account: "devices")
             devices = next
+            audio.timer.revoke(ownerID: id)
             for peerID in Array(peers.keys) where peers[peerID]?.deviceID == id { close(peerID) }
             failure = nil
             diagnostic = nil
@@ -495,7 +498,8 @@ final class PairingController {
         peers[id]?.action = Task { [weak self] in
             guard let self else { return }
             do {
-                let (snapshot, failure, mediaFailure) = try await self.audio.execute(frame)
+                let (snapshot, failure, mediaFailure, timerFailure) = try await self.audio.execute(
+                    frame, deviceID: deviceID)
                 guard self.peers[id]?.deviceID == deviceID, !Task.isCancelled else { return }
                 self.peers[id]?.action = nil
                 var result = RemoteAudioFrame(
@@ -504,6 +508,7 @@ final class PairingController {
                 result.snapshot = snapshot
                 result.failure = failure
                 result.mediaFailure = mediaFailure
+                result.timerFailure = timerFailure
                 self.sendAudio(result, to: id)
             } catch { self.close(id) }
         }
