@@ -1,8 +1,8 @@
 # Remote Control for iPhone
 
-**Current status:** pairing and audio passed the primary-device checks and both feature CI jobs before merge. Selected YouTube playback was verified on the primary Mac/iPhone on November 23: Pause/Play, browser-to-phone synchronization, changing videos in one selected tab, and audio control after closing that tab. The updated native apps launched after the iOS platform guard, and the UUID-casing fix passed 28 mobile and 14 extension tests. Final Mac checks after the guard, YouTube CI and broader failure/accessibility coverage remain pending. See [YouTube control](../../docs/youtube-control.md) for setup and recorded coverage.
+**Current status:** pairing and audio passed the primary-device checks and both feature CI jobs before merge. Selected YouTube playback was verified on the primary Mac/iPhone on November 23: Pause/Play, browser-to-phone synchronization, changing videos in one selected tab, and audio control after closing that tab. The updated native apps launched after the iOS platform guard, and the UUID-casing fix passed 28 mobile and 14 extension tests. Final Mac checks and both YouTube CI jobs subsequently passed before merge as `e92bec1`; broader failure/accessibility coverage remains pending. See [YouTube control](../../docs/youtube-control.md) for setup and recorded coverage.
 
-The Expo/React Native client for controlling a Mac on the local network. Secure pairing and saved-access verification are implemented and locally verified. Live remote audio has passed the primary-device workflow; selected YouTube playback has passed the primary-device workflow; timers and power remain planned. The remote preview continues to use local sample state.
+The Expo/React Native client for controlling a Mac on the local network. Secure pairing and saved-access verification are implemented and locally verified. Live remote audio has passed the primary-device workflow; selected YouTube playback has passed the primary-device workflow; the sleep timer is implemented with native/device acceptance pending; power controls remain planned. The remote preview continues to use local sample state.
 
 ## Current Features
 
@@ -62,7 +62,7 @@ pnpm check
 make -C apps/macos check
 ```
 
-The first command checks repository formatting, mobile/native-facade ESLint, mobile TypeScript, and 28 mobile and 14 browser unit tests, plus the extension bundle. The second checks the Swift packages and Mac application on macOS. Neither command replaces the physical iOS build or manual network/camera checks.
+The first command checks repository formatting, mobile/native-facade ESLint, mobile TypeScript, and 34 mobile and 16 browser unit tests, plus the extension bundle. The second checks the Swift packages and Mac application on macOS. Neither command replaces the physical iOS build or manual network/camera checks.
 
 Saved access is not a continuous remote session. The remote-audio update separates listener start, QR creation, saved-device labels, and active-session labels; its primary-device behavior has been checked; broader UI/accessibility coverage remains pending. Current pairing, signing, security boundaries, verified scenarios, and remaining cases are documented in [Secure Local Pairing](../../docs/secure-pairing.md).
 
@@ -74,3 +74,9 @@ Saved access is not a continuous remote session. The remote-audio update separat
 ## Selected YouTube Card
 
 `src/features/youtube/` renders confirmed metadata, position and play/pause. The existing focused remote hook serializes audio/media writes and reads the native cache. `mediaFailure` is independent of audio errors. `mediaAPIVersion` gates the native method for older installed binaries. Rebuild the iOS development app for this Swift change; Expo Go and a Metro-only reload cannot add the playback method. The shared timestamp formatter handles fractional positions and hours.
+
+## Mac-Owned Sleep Timer
+
+The timer increment adds custom 1–720-minute scheduling on the Mac, a separate selected-document identity, stale-command protection and independent timer status. It pauses the current ready video in that document and continues after the phone session closes. The schedule is in memory only; the Mac must remain awake. Creator revocation, selection loss and connection shutdown cancel active timers. There is no power action or automatic replay after an uncertain result.
+
+Portable checks pass 25 core, 36 protocol, 34 mobile and 16 extension tests. These do not establish Apple SDK compilation or physical-device behavior. Updated native builds, helper installation, Chrome/iPhone acceptance and timer CI remain pending. Read the [sleep timer guide](../../docs/sleep-timer.md) for exact source ownership, security rules, coordinated upgrade steps and the pending acceptance matrix.

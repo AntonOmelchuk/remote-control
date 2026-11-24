@@ -40,3 +40,9 @@ make -C apps/macos check
 See [macOS Audio Control](../../docs/macos-audio-control.md) for native behavior, current validation, and device limitations.
 
 The remote-audio update adds fan-out, subscriber cancellation, and global-stop coverage. All 17 current core tests pass on Swift 6.0.3/Linux; the maintainer subsequently passed the 17 core tests through the expanded 45-test Mac check. See [Authenticated Remote Audio](../../docs/remote-audio-control.md).
+
+## Mac-Owned Sleep Timer
+
+The timer increment adds custom 1–720-minute scheduling on the Mac, a separate selected-document identity, stale-command protection and independent timer status. It pauses the current ready video in that document and continues after the phone session closes. The schedule is in memory only; the Mac must remain awake. Creator revocation, selection loss and connection shutdown cancel active timers. There is no power action or automatic replay after an uncertain result.
+
+Portable checks pass 25 core, 36 protocol, 34 mobile and 16 extension tests. These do not establish Apple SDK compilation or physical-device behavior. Updated native builds, helper installation, Chrome/iPhone acceptance and timer CI remain pending. Read the [sleep timer guide](../../docs/sleep-timer.md) for exact source ownership, security rules, coordinated upgrade steps and the pending acceptance matrix.

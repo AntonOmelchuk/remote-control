@@ -7,6 +7,7 @@ import RemotePairing
 final class RemoteAudioBroker {
     private let service: AudioOutputService
     private let media: YouTubeService
+    let timer: SleepTimerController
     private var audioRevision: UInt64?
     private var revision: UInt64 = 0
     private var observation: Task<Void, Never>?
@@ -18,7 +19,13 @@ final class RemoteAudioBroker {
     init(service: AudioOutputService, media: YouTubeService) {
         self.service = service
         self.media = media
-        media.onChange = { [weak self] _ in
+        self.timer = SleepTimerController(media: media)
+        media.onChange = { [weak self] in
+            self?.timer.selectionChanged()
+            guard let self, let latest = self.latest else { return }
+            self.publish(output: latest.output, failure: latest.failure)
+        }
+        timer.onChange = { [weak self] in
             guard let self, let latest = self.latest else { return }
             self.publish(output: latest.output, failure: latest.failure)
         }
@@ -48,11 +55,11 @@ final class RemoteAudioBroker {
         return latest ?? RemoteAudioSnapshot(revision: 0, output: nil, failure: .hardwareFailure)
     }
 
-    func execute(_ frame: RemoteAudioFrame) async throws -> (
-        RemoteAudioSnapshot, RemoteAudioFailure?, MediaFailure?
+    func execute(_ frame: RemoteAudioFrame, deviceID: UUID) async throws -> (
+        RemoteAudioSnapshot, RemoteAudioFailure?, MediaFailure?, RemoteTimerFailure?
     ) {
         try Task.checkCancellation()
-        if frame.type == .refreshAudio { return (await refresh(), nil, nil) }
+        if frame.type == .refreshAudio { return (await refresh(), nil, nil, nil) }
         if frame.type == .setPlayback {
             guard let target = frame.targetID, let paused = frame.paused else {
                 throw PairingFailure.protocolError
@@ -60,10 +67,27 @@ final class RemoteAudioBroker {
             let failure = try await media.setPaused(paused, target: target)
             let current: RemoteAudioSnapshot
             if let latest { current = latest } else { current = await refresh() }
-            return (current, nil, failure)
+            return (current, nil, failure, nil)
+        }
+        if frame.type == .startSleepTimer || frame.type == .cancelSleepTimer {
+            let failure: RemoteTimerFailure?
+            if frame.type == .startSleepTimer {
+                guard let minutes = frame.durationMinutes, let selection = frame.selectionID else {
+                    throw PairingFailure.protocolError
+                }
+                failure = timer.start(
+                    minutes: minutes, selectionID: selection, expectedID: frame.timerID,
+                    ownerID: deviceID)
+            } else {
+                guard let id = frame.timerID else { throw PairingFailure.protocolError }
+                failure = timer.cancel(expectedID: id)
+            }
+            let current: RemoteAudioSnapshot
+            if let latest { current = latest } else { current = await refresh() }
+            return (current, nil, nil, failure)
         }
         guard frame.outputID == outputToken, let expected = outputID else {
-            return (await refresh(), .outputChanged, nil)
+            return (await refresh(), .outputChanged, nil, nil)
         }
         let result: AudioCommandResult
         switch frame.type {
@@ -80,7 +104,7 @@ final class RemoteAudioBroker {
             latest
             ?? RemoteAudioSnapshot(
                 revision: result.update.revision, output: nil, failure: .hardwareFailure)
-        return (snapshot, result.failure.map(mapFailure), nil)
+        return (snapshot, result.failure.map(mapFailure), nil, nil)
     }
 
     private func apply(_ update: AudioUpdate) {
@@ -117,7 +141,8 @@ final class RemoteAudioBroker {
     private func publish(output: RemoteAudioOutput?, failure: RemoteAudioFailure?) {
         revision += 1
         let snapshot = RemoteAudioSnapshot(
-            revision: revision, output: output, failure: failure, media: media.snapshot)
+            revision: revision, output: output, failure: failure, media: media.snapshot,
+            selectionID: media.selectionID, timer: timer.state)
         latest = snapshot
         onChange?(snapshot)
     }

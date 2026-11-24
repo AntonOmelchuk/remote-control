@@ -1,6 +1,6 @@
 # ADR 0005: Selected YouTube Control Through Native Messaging
 
-- Status: Accepted; primary native/browser/device workflow verified, feature CI pending
+- Status: Accepted; primary native/browser/device workflow verified, feature CI passed before merge
 - Date: November 22, 2026
 - Baseline: `4d11376`
 
@@ -38,4 +38,4 @@ See [YouTube control](../youtube-control.md) for setup, ownership, threat bounda
 
 The maintainer completed the Mac Agent/helper checks, signed launch, native-host registration and physical iOS build. The iOS build exposed a Mac-only filesystem API in shared sources; `BrowserRuntimeStore` is now compiled only on macOS/Linux, preserving its portable filesystem tests. Actual playback exposed a UUID text-casing mismatch missed by the original same-case fixture. TypeScript now canonicalizes validated UUIDs while preserving case-sensitive YouTube video IDs.
 
-Phone Pause/Play, browser-to-phone synchronization, changing videos in one selected watch tab, and media clearing with continued audio control after closing the tab passed. The follow-up passes 28 mobile and 14 extension tests. Final Mac checks after the guard, feature CI, long-running/background behavior and the remaining failure matrix are still pending.
+Phone Pause/Play, browser-to-phone synchronization, changing videos in one selected watch tab, and media clearing with continued audio control after closing the tab passed. The follow-up passes 28 mobile and 14 extension tests. Final Mac checks and both CI jobs subsequently passed before merge as `e92bec1`; long-running/background behavior and the remaining failure matrix are still pending.

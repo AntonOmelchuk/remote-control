@@ -144,7 +144,7 @@ export const en = {
   'remoteAudio.reconnect': 'Reconnect',
   'remoteAudio.disconnect': 'Disconnect',
   'remoteAudio.scope':
-    'Volume, mute, and selected YouTube playback. Timers, brightness, and power controls remain planned.',
+    'Volume, mute, selected YouTube playback, and a Mac-owned sleep timer. Brightness and power controls remain planned.',
   'remoteAudio.failure.invalidVolume': 'Choose a volume between 0% and 100%.',
   'remoteAudio.failure.noOutput': 'No audio output is available.',
   'remoteAudio.failure.outputChanged':
@@ -181,4 +181,53 @@ export const en = {
   'youtube.failure.blocked':
     'Chrome blocked playback. Play the video once in Chrome, then try again.',
   'youtube.failure.timedOut': 'Playback was not confirmed. Check Chrome before trying again.',
+  'sleepTimer.title': 'Sleep timer',
+  'sleepTimer.close': 'Close sleep timer',
+  'sleepTimer.description':
+    'Pause the selected YouTube tab when time runs out. Video changes in that tab keep the timer running.',
+  'sleepTimer.hoursMinutes': 'HOURS : MINUTES',
+  'sleepTimer.durationLabel': 'Sleep timer duration',
+  'sleepTimer.sliderHint': 'Drag to choose a duration. Plus and minus adjust by one minute.',
+  'sleepTimer.totalMinutes': '{{count}} min',
+  'sleepTimer.minimum': '1 min',
+  'sleepTimer.maximum': '12 h',
+  'sleepTimer.precision': 'Fine-tune by one minute',
+  'sleepTimer.increase': 'Increase timer by one minute',
+  'sleepTimer.decrease': 'Decrease timer by one minute',
+  'sleepTimer.start': 'Start timer',
+  'sleepTimer.replace': 'Replace timer',
+  'sleepTimer.choose': 'Choose duration',
+  'sleepTimer.change': 'Change duration',
+  'sleepTimer.cancel': 'Cancel timer',
+  'sleepTimer.phoneIndependent':
+    'Runs on your Mac, even when this app is closed. Your Mac must stay awake.',
+  'sleepTimer.editorChanged':
+    'The selected tab or timer changed. Close this picker and review the current state.',
+  'sleepTimer.buildRequired': 'Install the updated iPhone development build to use sleep timers.',
+  'sleepTimer.macRequired': 'Update and restart the Mac companion to use sleep timers.',
+  'sleepTimer.selectVideo': 'Select a ready YouTube video using the updated Chrome extension.',
+  'sleepTimer.state.idle': 'No active timer',
+  'sleepTimer.state.running': 'Counting down on your Mac',
+  'sleepTimer.state.executing': 'Confirming pause in Chrome…',
+  'sleepTimer.state.completed': 'Video paused',
+  'sleepTimer.state.cancelled': 'Timer cancelled',
+  'sleepTimer.state.failed': 'Timer could not pause the video',
+  'sleepTimer.cancelled.user': 'Cancelled by request.',
+  'sleepTimer.cancelled.selectionChanged': 'The selected tab changed or closed.',
+  'sleepTimer.cancelled.browserDisconnected': 'The browser connection ended.',
+  'sleepTimer.cancelled.connectionsStopped': 'Connections were stopped on the Mac.',
+  'sleepTimer.cancelled.ownerRevoked': 'Access for the phone that created this timer was revoked.',
+  'sleepTimer.failure.invalidDuration': 'Choose a duration from 1 minute to 12 hours.',
+  'sleepTimer.failure.timerChanged':
+    'The timer changed. Review its current state before trying again.',
+  'sleepTimer.failure.selectionChanged': 'The selected tab changed. Select the intended tab again.',
+  'sleepTimer.failure.notReady':
+    'The selected player is not ready. Check Chrome before trying again.',
+  'sleepTimer.failure.bridgeUnavailable':
+    'Chrome is disconnected. Reconnect the extension and start a new timer.',
+  'sleepTimer.failure.blocked': 'Chrome could not apply playback control. Check the player.',
+  'sleepTimer.failure.timedOut':
+    'Pause was not confirmed. Check the real player before trying again.',
+  'sleepTimer.failure.late':
+    'The deadline was missed, for example while the Mac was asleep. Start a new timer.',
 } as const;

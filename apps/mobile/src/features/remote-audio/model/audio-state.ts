@@ -1,4 +1,6 @@
-import { isMediaFailure, readYouTubeSnapshot } from '@remote-control/remote-link/media';
+import { isTimerFailure, readSleepTimer, timerIsActive } from '@remote-control/remote-link/timer';
+import type { TimerFailure, SleepTimerSnapshot } from '@remote-control/remote-link/timer';
+import { isUUID, isMediaFailure, readYouTubeSnapshot } from '@remote-control/remote-link/media';
 import type { MediaFailure, YouTubeSnapshot } from '@remote-control/remote-link/media';
 
 export const audioFailures = [
@@ -21,6 +23,8 @@ export type AudioOutput = {
 };
 export type AudioSnapshot = {
   media: YouTubeSnapshot | null;
+  selectionID: string | null;
+  timer: SleepTimerSnapshot | null;
   revision: number;
   output: AudioOutput | null;
   failure: AudioFailure | null;
@@ -30,6 +34,7 @@ export type AudioStatus = {
   snapshot: AudioSnapshot;
   commandFailure: AudioFailure | null;
   mediaFailure: MediaFailure | null;
+  timerFailure: TimerFailure | null;
 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const record = (value: unknown): value is Record<string, unknown> =>
@@ -49,7 +54,9 @@ export function readAudioStatus(text: string, owner: string): AudioStatus {
     (snapshot.revision as number) < 0 ||
     (snapshot.failure != null && !failure(snapshot.failure)) ||
     (value.commandFailure != null && !failure(value.commandFailure)) ||
-    (value.mediaFailure != null && !isMediaFailure(value.mediaFailure))
+    (value.mediaFailure != null && !isMediaFailure(value.mediaFailure)) ||
+    (value.timerFailure != null && !isTimerFailure(value.timerFailure)) ||
+    (snapshot.selectionID != null && !isUUID(snapshot.selectionID))
   ) {
     throw new Error('Invalid audio state');
   }
@@ -87,9 +94,15 @@ export function readAudioStatus(text: string, owner: string): AudioStatus {
       canSetMute: item.canSetMute,
     };
   }
+  const selectionID = isUUID(snapshot.selectionID) ? snapshot.selectionID.toLowerCase() : null;
+  const timer = snapshot.timer == null ? null : readSleepTimer(snapshot.timer);
+  if (timer && timerIsActive(timer) && timer.selectionID !== selectionID)
+    throw new Error('Timer selection mismatch');
   return {
     owner,
     snapshot: {
+      selectionID,
+      timer,
       media: snapshot.media == null ? null : readYouTubeSnapshot(snapshot.media),
       revision: snapshot.revision as number,
       output,
@@ -97,6 +110,7 @@ export function readAudioStatus(text: string, owner: string): AudioStatus {
     },
     commandFailure: (value.commandFailure as AudioFailure | undefined) ?? null,
     mediaFailure: (value.mediaFailure as MediaFailure | undefined) ?? null,
+    timerFailure: (value.timerFailure as TimerFailure | undefined) ?? null,
   };
 }
 

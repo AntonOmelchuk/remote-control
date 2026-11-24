@@ -903,6 +903,150 @@
           }
         }
       }
+    },
+    "Sleep timer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep timer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Таймер сну"
+          }
+        }
+      }
+    },
+    "Set a sleep timer on your iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set a sleep timer on your iPhone."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налаштуйте таймер сну на iPhone."
+          }
+        }
+      }
+    },
+    "The selected YouTube tab will pause when the timer ends.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected YouTube tab will pause when the timer ends."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Після завершення таймера відео у вибраній вкладці YouTube буде призупинено."
+          }
+        }
+      }
+    },
+    "Pausing the selected video…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausing the selected video…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Призупинення вибраного відео…"
+          }
+        }
+      }
+    },
+    "The selected video is paused.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected video is paused."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибране відео призупинено."
+          }
+        }
+      }
+    },
+    "Sleep timer cancelled.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep timer cancelled."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Таймер сну скасовано."
+          }
+        }
+      }
+    },
+    "The timer could not pause the video. Check its status on your iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The timer could not pause the video. Check its status on your iPhone."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Таймер не зміг призупинити відео. Перевірте його стан на iPhone."
+          }
+        }
+      }
+    },
+    "Cancel sleep timer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel sleep timer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати таймер сну"
+          }
+        }
+      }
+    },
+    "Keep your Mac awake. Closing the iPhone app does not cancel this timer.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your Mac awake. Closing the iPhone app does not cancel this timer."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac має залишатися активним. Закриття застосунку на iPhone не скасовує таймер."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

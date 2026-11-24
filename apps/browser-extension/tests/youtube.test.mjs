@@ -172,3 +172,12 @@ test('the video adapter accepts the same UUID in either case and still rejects a
   assert.equal(await adapter.setPaused(crypto.randomUUID(), false), 'targetChanged');
   assert.equal(state.video.paused, true);
 });
+
+test('document selection identity is canonical and cannot be attached to a playback command', () => {
+  const selectionID = '7C4242CC-734A-4312-8D85-822728D0A007';
+  const state = { ...fixture.state, selectionID };
+  assert.equal(readPacket(state, 'upstream').selectionID, selectionID.toLowerCase());
+  assert.throws(() => readPacket({ ...state, selectionID: 'not-a-uuid' }, 'upstream'));
+  assert.throws(() => readPacket({ ...fixture.command, selectionID }, 'downstream'));
+  assert.throws(() => readPacket({ ...packet('browserHeartbeat'), selectionID }, 'upstream'));
+});

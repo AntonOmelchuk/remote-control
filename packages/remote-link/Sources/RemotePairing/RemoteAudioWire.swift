@@ -32,19 +32,27 @@ public struct RemoteAudioSnapshot: Codable, Equatable, Sendable {
     public let output: RemoteAudioOutput?
     public let failure: RemoteAudioFailure?
     public let media: YouTubeSnapshot?
+    public let selectionID: UUID?
+    public let timer: RemoteSleepTimer?
 
     public init(
         revision: UInt64, output: RemoteAudioOutput?, failure: RemoteAudioFailure?,
-        media: YouTubeSnapshot? = nil
+        media: YouTubeSnapshot? = nil, selectionID: UUID? = nil, timer: RemoteSleepTimer? = nil
     ) {
         self.revision = revision
         self.output = output
         self.failure = failure
         self.media = media
+        self.selectionID = selectionID
+        self.timer = timer
     }
 
     public func validate() throws {
         try media?.validate()
+        try timer?.validate()
+        if let timer, timer.phase.isActive, timer.selectionID != selectionID {
+            throw PairingFailure.protocolError
+        }
         // The Expo facade exposes JSON numbers, so revisions must remain exactly representable.
         guard revision <= 9_007_199_254_740_991, output == nil || failure == nil else {
             throw PairingFailure.protocolError
@@ -66,6 +74,7 @@ public struct RemoteAudioSnapshot: Codable, Equatable, Sendable {
 public struct RemoteAudioFrame: Codable, Sendable {
     public enum Kind: String, Codable, Sendable {
         case audioWelcome, audioUpdate, audioResult, setVolume, setMuted, refreshAudio, setPlayback
+        case startSleepTimer, cancelSleepTimer
     }
     public var version = 1
     public var type: Kind
@@ -77,6 +86,10 @@ public struct RemoteAudioFrame: Codable, Sendable {
     public var targetID: UUID?
     public var paused: Bool?
     public var mediaFailure: MediaFailure?
+    public var timerFailure: RemoteTimerFailure?
+    public var selectionID: UUID?
+    public var timerID: UUID?
+    public var durationMinutes: Int?
     public var muted: Bool?
     public var snapshot: RemoteAudioSnapshot?
     public var failure: RemoteAudioFailure?
@@ -99,6 +112,7 @@ public struct RemoteAudioFrame: Codable, Sendable {
             let allowed: Set<String> = [
                 "version", "type", "requestID", "sessionID", "sequence", "outputID",
                 "volume", "muted", "snapshot", "failure", "targetID", "paused", "mediaFailure",
+                "timerFailure", "selectionID", "timerID", "durationMinutes",
             ]
             guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                 Set(object.keys).isSubset(of: allowed)
@@ -111,7 +125,11 @@ public struct RemoteAudioFrame: Codable, Sendable {
 
     public func validateCommand() throws {
         guard version == 1, sequence > 0, sequence <= 9_007_199_254_740_991,
-            snapshot == nil, failure == nil, mediaFailure == nil
+            snapshot == nil, failure == nil, mediaFailure == nil, timerFailure == nil
+        else { throw PairingFailure.protocolError }
+        guard
+            type == .startSleepTimer || type == .cancelSleepTimer
+                || (selectionID == nil && timerID == nil && durationMinutes == nil)
         else { throw PairingFailure.protocolError }
         switch type {
         case .setVolume:
@@ -133,20 +151,28 @@ public struct RemoteAudioFrame: Codable, Sendable {
             else {
                 throw PairingFailure.protocolError
             }
+        case .startSleepTimer:
+            guard selectionID != nil, let durationMinutes, (1...720).contains(durationMinutes),
+                targetID == nil, paused == nil, outputID == nil, volume == nil, muted == nil
+            else { throw PairingFailure.protocolError }
+        case .cancelSleepTimer:
+            guard timerID != nil, selectionID == nil, durationMinutes == nil,
+                targetID == nil, paused == nil, outputID == nil, volume == nil, muted == nil
+            else { throw PairingFailure.protocolError }
         default: throw PairingFailure.protocolError
         }
     }
 
     public func validateServerFrame() throws {
         guard version == 1, outputID == nil, volume == nil, muted == nil, targetID == nil,
-            paused == nil, let snapshot
+            paused == nil, selectionID == nil, timerID == nil, durationMinutes == nil, let snapshot
         else {
             throw PairingFailure.protocolError
         }
         try snapshot.validate()
         switch type {
         case .audioWelcome, .audioUpdate:
-            guard sequence == 0, failure == nil, mediaFailure == nil else {
+            guard sequence == 0, failure == nil, mediaFailure == nil, timerFailure == nil else {
                 throw PairingFailure.protocolError
             }
         case .audioResult:

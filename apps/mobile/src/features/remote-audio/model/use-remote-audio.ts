@@ -1,6 +1,7 @@
 import {
   remoteAudioAvailable,
   remoteMediaAvailable,
+  remoteTimerAvailable,
   remoteLink,
 } from '@remote-control/remote-link';
 import { useFocusEffect } from 'expo-router';
@@ -139,7 +140,26 @@ export function useRemoteAudio() {
     [submit],
   );
 
+  const startSleepTimer = useCallback(
+    (selectionID: string, minutes: number, expectedTimerID: string | null) => {
+      if (!remoteTimerAvailable) return Promise.resolve();
+      return submit((api, owner) =>
+        api.startSleepTimer(owner, selectionID, minutes, expectedTimerID),
+      );
+    },
+    [submit],
+  );
+  const cancelSleepTimer = useCallback(
+    (timerID: string) => {
+      if (!remoteTimerAvailable) return Promise.resolve();
+      return submit((api, owner) => api.cancelSleepTimer(owner, timerID));
+    },
+    [submit],
+  );
   return {
+    timerAvailable: remoteTimerAvailable,
+    startSleepTimer,
+    cancelSleepTimer,
     mediaAvailable: remoteMediaAvailable,
     setPlayback,
     available: remoteAudioAvailable,

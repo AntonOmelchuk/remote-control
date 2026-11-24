@@ -148,7 +148,7 @@ export const uk = {
   'remoteAudio.reconnect': 'Підключитися знову',
   'remoteAudio.disconnect': 'Від’єднатися',
   'remoteAudio.scope':
-    'Гучність, звук і вибране відео YouTube. Таймери, яскравість та живлення — у планах.',
+    'Гучність, вимкнення звуку, відтворення YouTube та таймер сну на Mac. Яскравість і керування живленням заплановано.',
   'remoteAudio.failure.invalidVolume': 'Вибери гучність від 0% до 100%.',
   'remoteAudio.failure.noOutput': 'Немає доступного аудіовиходу.',
   'remoteAudio.failure.outputChanged':
@@ -183,4 +183,53 @@ export const uk = {
   'youtube.failure.blocked':
     'Chrome заблокував відтворення. Запустіть відео один раз у Chrome та повторіть спробу.',
   'youtube.failure.timedOut': 'Відтворення не підтверджено. Перевірте Chrome перед новою спробою.',
+  'sleepTimer.title': 'Таймер сну',
+  'sleepTimer.close': 'Закрити таймер сну',
+  'sleepTimer.description':
+    'Коли час закінчиться, вибрана вкладка YouTube стане на паузу. Перехід на інше відео в ній збереже відлік.',
+  'sleepTimer.hoursMinutes': 'ГОДИНИ : ХВИЛИНИ',
+  'sleepTimer.durationLabel': 'Тривалість таймера сну',
+  'sleepTimer.sliderHint':
+    'Перетягніть повзунок, щоб вибрати тривалість. Плюс і мінус змінюють її на одну хвилину.',
+  'sleepTimer.totalMinutes': '{{count}} хв',
+  'sleepTimer.minimum': '1 хв',
+  'sleepTimer.maximum': '12 год',
+  'sleepTimer.precision': 'Точно до однієї хвилини',
+  'sleepTimer.increase': 'Збільшити таймер на одну хвилину',
+  'sleepTimer.decrease': 'Зменшити таймер на одну хвилину',
+  'sleepTimer.start': 'Запустити таймер',
+  'sleepTimer.replace': 'Замінити таймер',
+  'sleepTimer.choose': 'Вибрати тривалість',
+  'sleepTimer.change': 'Змінити тривалість',
+  'sleepTimer.cancel': 'Скасувати таймер',
+  'sleepTimer.phoneIndependent':
+    'Працює на Mac, навіть коли застосунок закрито. Mac має залишатися активним.',
+  'sleepTimer.editorChanged':
+    'Вкладка або таймер змінилися. Закрийте це вікно та перевірте поточний стан.',
+  'sleepTimer.buildRequired': 'Встановіть оновлену development-збірку iPhone для таймера сну.',
+  'sleepTimer.macRequired': 'Оновіть і перезапустіть застосунок на Mac для таймера сну.',
+  'sleepTimer.selectVideo': 'Виберіть готове відео YouTube через оновлене розширення Chrome.',
+  'sleepTimer.state.idle': 'Немає активного таймера',
+  'sleepTimer.state.running': 'Відлік на вашому Mac',
+  'sleepTimer.state.executing': 'Підтверджуємо паузу в Chrome…',
+  'sleepTimer.state.completed': 'Відео призупинено',
+  'sleepTimer.state.cancelled': 'Таймер скасовано',
+  'sleepTimer.state.failed': 'Таймер не зміг призупинити відео',
+  'sleepTimer.cancelled.user': 'Скасовано за запитом.',
+  'sleepTimer.cancelled.selectionChanged': 'Вибрана вкладка змінилася або закрилася.',
+  'sleepTimer.cancelled.browserDisconnected': 'З’єднання з браузером завершилося.',
+  'sleepTimer.cancelled.connectionsStopped': 'З’єднання зупинено на Mac.',
+  'sleepTimer.cancelled.ownerRevoked': 'Доступ телефона, що створив таймер, відкликано.',
+  'sleepTimer.failure.invalidDuration': 'Виберіть тривалість від 1 хвилини до 12 годин.',
+  'sleepTimer.failure.timerChanged': 'Таймер змінився. Перевірте його стан перед новою спробою.',
+  'sleepTimer.failure.selectionChanged':
+    'Вибрана вкладка змінилася. Виберіть потрібну вкладку знову.',
+  'sleepTimer.failure.notReady': 'Вибраний плеєр не готовий. Перевірте Chrome перед новою спробою.',
+  'sleepTimer.failure.bridgeUnavailable':
+    'Chrome від’єднано. Підключіть розширення та створіть новий таймер.',
+  'sleepTimer.failure.blocked':
+    'Chrome не зміг застосувати керування відтворенням. Перевірте плеєр.',
+  'sleepTimer.failure.timedOut': 'Пауза не підтверджена. Перевірте плеєр перед новою спробою.',
+  'sleepTimer.failure.late':
+    'Час виконання пропущено, наприклад через сон Mac. Створіть новий таймер.',
 } as const satisfies { [Key in keyof typeof en]: string };

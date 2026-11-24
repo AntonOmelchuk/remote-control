@@ -189,3 +189,7 @@ These follow-ups are addressed in the remote-audio source update and await devic
 - [Expo SDK 58 camera](https://docs.expo.dev/versions/v58.0.0/sdk/camera/)
 - [Expo Modules API](https://docs.expo.dev/modules/module-api/)
 - [Expo Autolinking](https://docs.expo.dev/modules/autolinking/)
+
+## Sleep Timer Authority
+
+The timer extension of the foreground protocol does not add a credential or listening endpoint. `startSleepTimer` and `cancelSleepTimer` use the existing session, strict sequence/rate gate and saved-device check. The Agent supplies creator identity from the authenticated peer; JavaScript cannot choose an owner. Revoking that device cancels its timer even after disconnection. Normal session closure leaves the Mac-owned timer running. The browser role cannot create schedules or dispatch power/system commands. See [Sleep timer](sleep-timer.md) for command shapes, limits and cancellation semantics.

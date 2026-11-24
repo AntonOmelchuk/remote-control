@@ -1,0 +1,57 @@
+{
+  "status": {
+    "owner": "sleep-timer-test",
+    "snapshot": {
+      "revision": 42,
+      "media": {
+        "availability": "ready",
+        "targetID": "2a435959-4bf7-4a93-9b4b-217a0e666941",
+        "videoID": "dQw4w9WgXcQ",
+        "title": "A quiet evening / Тихий вечір",
+        "paused": true,
+        "position": 125.75,
+        "duration": 3725.5
+      },
+      "selectionID": "7c4242cc-734a-4312-8d85-822728d0a007",
+      "timer": {
+        "phase": "running",
+        "id": "8c4242cc-734a-4312-8d85-822728d0a008",
+        "selectionID": "7c4242cc-734a-4312-8d85-822728d0a007",
+        "durationSeconds": 9900,
+        "remainingSeconds": 9899
+      }
+    }
+  },
+  "state": {
+    "version": 1,
+    "type": "browserState",
+    "sequence": 0,
+    "snapshot": {
+      "availability": "ready",
+      "targetID": "2a435959-4bf7-4a93-9b4b-217a0e666941",
+      "videoID": "dQw4w9WgXcQ",
+      "title": "A quiet evening / Тихий вечір",
+      "paused": true,
+      "position": 125.75,
+      "duration": 3725.5
+    },
+    "selectionID": "7c4242cc-734a-4312-8d85-822728d0a007"
+  },
+  "start": {
+    "version": 1,
+    "type": "startSleepTimer",
+    "requestID": "8c4242cc-734a-4312-8d85-822728d0a008",
+    "sessionID": "9c4242cc-734a-4312-8d85-822728d0a009",
+    "sequence": 1,
+    "selectionID": "7c4242cc-734a-4312-8d85-822728d0a007",
+    "durationMinutes": 165
+  },
+  "cancel": {
+    "version": 1,
+    "type": "cancelSleepTimer",
+    "requestID": "7c4242cc-734a-4312-8d85-822728d0a007",
+    "sessionID": "9c4242cc-734a-4312-8d85-822728d0a009",
+    "sequence": 2,
+    "timerID": "8c4242cc-734a-4312-8d85-822728d0a008"
+  }
+}

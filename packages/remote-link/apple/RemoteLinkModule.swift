@@ -8,6 +8,18 @@ public final class RemoteLinkModule: Module {
         Name("RemoteLink")
         Constant("audioAPIVersion") { 1 }
         Constant("mediaAPIVersion") { 1 }
+        Constant("timerAPIVersion") { 1 }
+        AsyncFunction("startSleepTimer") {
+            [audio] (owner: String, selectionID: String, minutes: Int, expectedTimerID: String?)
+                async throws -> String in
+            try await audio.startSleepTimer(
+                owner: owner, selectionID: selectionID, minutes: minutes,
+                expectedTimerID: expectedTimerID)
+        }
+        AsyncFunction("cancelSleepTimer") {
+            [audio] (owner: String, timerID: String) async throws -> String in
+            try await audio.cancelSleepTimer(owner: owner, timerID: timerID)
+        }
         AsyncFunction("setPlayback") {
             [audio] (owner: String, targetID: String, paused: Bool) async throws -> String in
             try await audio.setPlayback(owner: owner, targetID: targetID, paused: paused)

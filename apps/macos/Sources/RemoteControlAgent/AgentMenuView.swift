@@ -34,6 +34,8 @@ struct AgentMenuView: View {
                         .tint(accent)
                     BrowserControlCard(controller: pairing)
                         .tint(accent)
+                    SleepTimerStatusCard(controller: pairing.sleepTimer)
+                        .tint(accent)
                     AudioControlCard(service: audio)
                         .tint(accent)
                 }

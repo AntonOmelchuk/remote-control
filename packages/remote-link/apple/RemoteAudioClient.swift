@@ -9,6 +9,7 @@ private struct RemoteAudioStatus: Codable {
     let snapshot: RemoteAudioSnapshot
     let commandFailure: RemoteAudioFailure?
     let mediaFailure: MediaFailure?
+    let timerFailure: RemoteTimerFailure?
 }
 
 /// One foreground session, one command in flight. Never retries a write after an ambiguous result.
@@ -22,6 +23,7 @@ actor RemoteAudioClient {
     private var snapshot: RemoteAudioSnapshot?
     private var commandFailure: RemoteAudioFailure?
     private var mediaFailure: MediaFailure?
+    private var timerFailure: RemoteTimerFailure?
     private var nextSequence: UInt64 = 1
     private var receiver: Task<Void, Never>?
     private var heartbeat: Task<Void, Never>?
@@ -96,7 +98,7 @@ actor RemoteAudioClient {
             decoding: try JSONEncoder().encode(
                 RemoteAudioStatus(
                     owner: requested, snapshot: snapshot, commandFailure: commandFailure,
-                    mediaFailure: mediaFailure)),
+                    mediaFailure: mediaFailure, timerFailure: timerFailure)),
             as: UTF8.self)
     }
 
@@ -127,6 +129,37 @@ actor RemoteAudioClient {
         return try await submit(frame, owner: owner)
     }
 
+    func startSleepTimer(owner: String, selectionID: String, minutes: Int, expectedTimerID: String?)
+        async throws -> String
+    {
+        guard let selection = UUID(uuidString: selectionID) else {
+            throw PairingFailure.protocolError
+        }
+        let expected: UUID?
+        if let expectedTimerID {
+            guard let id = UUID(uuidString: expectedTimerID) else {
+                throw PairingFailure.protocolError
+            }
+            expected = id
+        } else {
+            expected = nil
+        }
+        try await waitForHeartbeat(owner: owner)
+        var frame = try command(.startSleepTimer, owner: owner)
+        frame.selectionID = selection
+        frame.durationMinutes = minutes
+        frame.timerID = expected
+        return try await submit(frame, owner: owner)
+    }
+
+    func cancelSleepTimer(owner: String, timerID: String) async throws -> String {
+        guard let id = UUID(uuidString: timerID) else { throw PairingFailure.protocolError }
+        try await waitForHeartbeat(owner: owner)
+        var frame = try command(.cancelSleepTimer, owner: owner)
+        frame.timerID = id
+        return try await submit(frame, owner: owner)
+    }
+
     func disconnect(owner requested: String) {
         guard owner == requested else { return }
         cancelAll()
@@ -138,6 +171,7 @@ actor RemoteAudioClient {
         snapshot = nil
         commandFailure = nil
         mediaFailure = nil
+        timerFailure = nil
         receiver?.cancel()
         heartbeat?.cancel()
         deadline?.cancel()
@@ -170,12 +204,14 @@ actor RemoteAudioClient {
     }
 
     private func statusWithFailure(
-        _ failure: RemoteAudioFailure?, playbackFailure: MediaFailure?, owner requested: String
+        _ failure: RemoteAudioFailure?, playbackFailure: MediaFailure?,
+        timerFailure: RemoteTimerFailure?, owner requested: String
     ) throws
         -> String
     {
         commandFailure = failure
         mediaFailure = playbackFailure
+        self.timerFailure = timerFailure
         return try status(owner: requested)
     }
 
@@ -242,6 +278,9 @@ actor RemoteAudioClient {
                             ? frame.failure : commandFailure,
                         playbackFailure: operation.frame.type == .setPlayback
                             ? frame.mediaFailure : mediaFailure,
+                        timerFailure: operation.frame.type == .startSleepTimer
+                            || operation.frame.type == .cancelSleepTimer
+                            ? frame.timerFailure : timerFailure,
                         owner: requested)
                     pending = nil
                     deadline?.cancel()
